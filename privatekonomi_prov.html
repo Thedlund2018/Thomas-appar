@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PROV — Privatekonomi | Samhällskunskap 1a</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F4F6F9;
+  --surface: #FFFFFF;
+  --border: #D1D9E0;
+  --border-strong: #B0BCC8;
+  --text: #1A2332;
+  --muted: #4A5568;
+  --l1: #D4500A;
+  --l2: #1A6FB5;
+  --success: #1A7A4A;
+  --success-bg: #E8F5EE;
+  --success-border: #A3D4B5;
+  --warning: #92600A;
+  --warning-bg: #FEF3E2;
+  --warning-border: #F5C97A;
+  --danger: #C0392B;
+  --danger-bg: #FDECEA;
+  --danger-border: #F5A89A;
+  --info-bg: #EBF4FD;
+  --info-border: #A3C4E8;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-size: 16px;
+  min-height: 100vh;
+  line-height: 1.55;
+}
+h1,h2,h3 { font-family: 'Syne', sans-serif; }
+
+/* HEADER */
+#header {
+  padding: 14px 24px;
+  background: var(--surface);
+  border-bottom: 2px solid var(--border);
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.logo { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; letter-spacing: -0.5px; }
+.logo span { color: var(--l1); }
+.logo-sub { font-size: 12px; color: var(--muted); font-weight: 500; margin-top: 1px; }
+.score-pill {
+  background: var(--bg); border: 1px solid var(--border-strong);
+  border-radius: 20px; padding: 6px 16px; font-size: 13px;
+  font-family: 'Syne', sans-serif; font-weight: 700; color: var(--text);
+}
+.score-pill span { color: var(--success); }
+
+/* APP */
+#app { max-width: 760px; margin: 0 auto; padding: 32px 20px 80px; }
+
+/* PROGRESS BAR */
+.progress-track {
+  background: var(--border); border-radius: 6px; height: 8px; margin-bottom: 8px;
+}
+.progress-fill {
+  height: 8px; border-radius: 6px; background: var(--l1);
+  transition: width 0.4s ease;
+}
+.progress-label { font-size: 13px; color: var(--muted); font-weight: 500; display: flex; justify-content: space-between; margin-bottom: 16px; }
+
+/* CARD */
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 14px; padding: 28px; margin-bottom: 20px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.card.accent-ok { border-left: 5px solid var(--success); }
+.card.accent-err { border-left: 5px solid var(--danger); }
+
+/* QUESTION */
+.q-meta { font-size: 12px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; }
+.q-text { font-size: 18px; font-weight: 600; line-height: 1.4; margin-bottom: 20px; color: var(--text); }
+.q-text .q-num { font-family: 'Syne', sans-serif; font-weight: 800; color: var(--l1); margin-right: 6px; }
+
+/* OPTIONS */
+.options { display: flex; flex-direction: column; gap: 10px; }
+.opt {
+  background: var(--surface); border: 2px solid var(--border);
+  border-radius: 10px; padding: 14px 18px; cursor: pointer;
+  font-size: 15px; transition: all 0.15s; text-align: left;
+  color: var(--text); font-family: 'DM Sans', sans-serif; display: flex; align-items: center; gap: 12px;
+}
+.opt-letter {
+  width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 800;
+  background: var(--bg); border: 1px solid var(--border-strong); color: var(--muted);
+  transition: all 0.15s;
+}
+.opt:hover:not(.locked) { border-color: var(--l2); background: var(--info-bg); }
+.opt:hover:not(.locked) .opt-letter { background: var(--l2); color: #fff; border-color: var(--l2); }
+.opt.correct { border-color: var(--success); background: var(--success-bg); }
+.opt.correct .opt-letter { background: var(--success); color: #fff; border-color: var(--success); }
+.opt.wrong { border-color: var(--danger); background: var(--danger-bg); }
+.opt.wrong .opt-letter { background: var(--danger); color: #fff; border-color: var(--danger); }
+.opt.show-correct { border-color: var(--success); background: var(--success-bg); opacity: 0.75; }
+.opt.show-correct .opt-letter { background: var(--success); color: #fff; border-color: var(--success); }
+.opt.locked { pointer-events: none; }
+.opt.locked:not(.correct):not(.wrong):not(.show-correct) { opacity: 0.5; }
+
+/* FEEDBACK BUBBLE */
+.feedback-bubble {
+  border-radius: 12px; padding: 16px 18px; margin-top: 16px;
+  font-size: 15px; font-weight: 500; line-height: 1.55;
+  display: flex; align-items: flex-start; gap: 12px;
+}
+.feedback-bubble.ok { background: var(--success-bg); border: 1px solid var(--success-border); color: #0E5C30; }
+.feedback-bubble.err { background: var(--danger-bg); border: 1px solid var(--danger-border); color: #9B2010; }
+.fb-icon { font-size: 22px; flex-shrink: 0; }
+.fb-text strong { font-weight: 700; display: block; margin-bottom: 3px; font-size: 16px; }
+
+/* BUTTONS */
+.btn {
+  background: var(--l1); color: #fff; border: none; border-radius: 10px;
+  padding: 14px 28px; font-family: 'Syne', sans-serif; font-size: 15px;
+  font-weight: 800; cursor: pointer; transition: all 0.15s;
+}
+.btn:hover { filter: brightness(1.08); transform: translateY(-1px); }
+.btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+.btn-success { background: var(--success); }
+.btn-secondary { background: var(--surface); border: 2px solid var(--border-strong); color: var(--text); }
+.btn-secondary:hover { border-color: var(--l1); color: var(--l1); background: #FEF0E8; }
+.btn-full { width: 100%; }
+.btn-row { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
+
+/* DIVIDER */
+.divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+
+/* RESULT TABLE */
+.result-row {
+  display: flex; gap: 12px; padding: 14px 0;
+  border-bottom: 1px solid var(--border); align-items: flex-start;
+}
+.result-row:last-child { border-bottom: none; }
+.result-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+.result-q { font-weight: 600; font-size: 14px; color: var(--text); margin-bottom: 4px; }
+.result-answer { font-size: 13px; color: var(--muted); }
+.result-answer .correct-ans { color: var(--success); font-weight: 600; }
+.result-answer .wrong-ans { color: var(--danger); font-weight: 600; text-decoration: line-through; margin-right: 6px; }
+
+/* SCORE DISPLAY */
+.score-hero { text-align: center; padding: 32px 16px 24px; }
+.score-circle {
+  width: 120px; height: 120px; border-radius: 50%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  margin: 0 auto 16px;
+  border: 6px solid var(--success);
+  background: var(--success-bg);
+}
+.score-circle.fail { border-color: var(--danger); background: var(--danger-bg); }
+.score-pct { font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800; color: var(--success); line-height: 1; }
+.score-circle.fail .score-pct { color: var(--danger); }
+.score-label { font-size: 12px; color: var(--muted); font-weight: 600; margin-top: 3px; }
+.score-title { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; color: var(--text); }
+.score-sub { color: var(--muted); font-size: 15px; margin-top: 8px; }
+
+/* BADGE */
+.badge {
+  display: inline-block; padding: 4px 12px; border-radius: 20px;
+  font-size: 12px; font-weight: 700; font-family: 'Syne', sans-serif;
+  letter-spacing: 0.3px;
+}
+.badge-ok { background: var(--success-bg); color: var(--success); border: 1px solid var(--success-border); }
+.badge-err { background: var(--danger-bg); color: var(--danger); border: 1px solid var(--danger-border); }
+
+/* INTRO */
+.intro-hero { text-align: center; padding: 36px 16px 28px; }
+.intro-hero h1 { font-size: clamp(28px, 6vw, 44px); font-weight: 800; letter-spacing: -1.5px; line-height: 1.1; }
+.intro-hero h1 span { color: var(--l1); }
+.intro-sub { color: var(--muted); font-size: 16px; margin: 12px auto 24px; max-width: 500px; line-height: 1.6; }
+
+/* INFO GRID */
+.info-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin: 20px 0; }
+.info-cell { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; text-align: center; }
+.info-cell .label { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+.info-cell .value { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: var(--text); }
+
+/* LINK TEASER */
+.link-teaser {
+  background: linear-gradient(135deg, #FEF0E8 0%, #FDE8D8 100%);
+  border: 2px solid #E8A070; border-radius: 14px; padding: 20px 24px;
+  display: flex; align-items: center; gap: 16px; margin-top: 24px;
+  cursor: pointer; transition: all 0.2s; text-decoration: none;
+}
+.link-teaser:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(212,80,10,0.15); }
+.lt-emoji { font-size: 36px; flex-shrink: 0; }
+.lt-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 16px; color: var(--l1); }
+.lt-sub { font-size: 13px; color: var(--muted); margin-top: 3px; line-height: 1.4; }
+
+/* ANIMATE */
+.fade-in { animation: fadeIn 0.35s ease both; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* RESPONSIVE */
+@media (max-width: 520px) {
+  .info-grid { grid-template-columns: 1fr 1fr; }
+  .q-text { font-size: 16px; }
+  .card { padding: 20px; }
+}
+
+@media print {
+  #header, .btn, .btn-row { display: none !important; }
+}
+</style>
+</head>
+<body>
+
+<div id="header">
+  <div>
+    <div class="logo">VUXEN<span>LIVET</span></div>
+    <div class="logo-sub">Prov — Privatekonomi · Samhällskunskap 1a · Gy25</div>
+  </div>
+  <div class="score-pill" id="headerScore" style="display:none">
+    Rätt: <span id="headerCorrect">0</span> / <span id="headerTotal">0</span>
+  </div>
+</div>
+
+<div id="app"></div>
+
+<script>
+// ============================================================
+// QUESTION BANK — Privatekonomi, Samhällskunskap 1a, Gy25
+// ============================================================
+const ALL_QUESTIONS = [
+  // --- INKOMST & SKATT ---
+  {
+    id: 1, topic: 'Inkomst & skatt',
+    q: 'Vad är skillnaden mellan bruttolön och nettolön?',
+    opts: ['A) Bruttolönen betalas ut av arbetsgivaren och nettolönen av staten',
+           'B) Bruttolön är lönen innan skatt och nettolön är lönen efter att skatt dragits',
+           'C) Bruttolön gäller heltidsanställda och nettolön deltidsanställda',
+           'D) Det är samma sak, bara olika ord'],
+    correct: 'B',
+    explain: 'Bruttolön = vad arbetsgivaren betalar dig. Nettolön = vad som hamnar på ditt konto efter att arbetsgivaren dragit preliminärskatt (A-skatt) och betalat den till Skatteverket.',
+    praise: 'Perfekt! Det är en av de viktigaste grunderna i privatekonomi.',
+    encourage: 'Det här är lätt att blanda ihop — men nu vet du det!'
+  },
+  {
+    id: 2, topic: 'Inkomst & skatt',
+    q: 'Vad kallas den skatt som arbetsgivaren automatiskt drar från din lön varje månad?',
+    opts: ['A) Moms', 'B) Fastighetsskatt', 'C) A-skatt (preliminärskatt)', 'D) Bolagsskatt'],
+    correct: 'C',
+    explain: 'A-skatt kallas även preliminärskatt. Arbetsgivaren drar den direkt och betalar till Skatteverket — du behöver aldrig göra det själv. Det är anledningen till att man som anställd slipper betala skatt i efterhand varje år.',
+    praise: 'Exakt rätt! Du kan din skatteterminologi.',
+    encourage: 'Nästan! A-skatt är en vardagsterm som är bra att kunna — lär dig den till nästa gång.'
+  },
+  {
+    id: 3, topic: 'Inkomst & skatt',
+    q: 'Vad innebär det att man måste betala "kvarskatt"?',
+    opts: ['A) En extra skatt för lägenhetsinnehavare',
+           'B) Skatt som betalas varje kvartal',
+           'C) Att för lite preliminärskatt har dragits under året och man måste betala mellanskillnaden',
+           'D) Arbetsgivarens del av skatten'],
+    correct: 'C',
+    explain: 'Om arbetsgivaren dragit för lite preliminärskatt under året visar deklarationen ett underskott — det kallas kvarskatt. Omvänt: har för mycket dragits får man tillbaka pengar, kallat skatteåterbäring.',
+    praise: '🎯 Spot on! Kvarskatt är viktigt att förstå inför första deklarationen.',
+    encourage: 'Tänk tvärtom — kvarskatt är när du fått för lite skatt dragen, inte för mycket.'
+  },
+  {
+    id: 4, topic: 'Inkomst & skatt',
+    q: 'I Sverige består kommunalskatten av en kommunal och en regional del. Vad är den ungefärliga totala skattesatsen för en normalinkomst?',
+    opts: ['A) Ca 10–15%', 'B) Ca 20–22%', 'C) Ca 30–33%', 'D) Ca 45–50%'],
+    correct: 'C',
+    explain: 'Kommunalskatten i Sverige varierar mellan kommuner men ligger typiskt på 30–33% för vanliga inkomster. Det är summan av kommunal skatt (ca 20–23%) och regional skatt (ca 10–12%). Statlig inkomstskatt (20% extra) tillkommer först vid höga inkomster, ca 54 000 kr/mån.',
+    praise: '✅ Rätt! Bra koll på skattesatserna.',
+    encourage: 'Tänk: ungefär en tredjedel av lönen går i skatt — det är en bra tumregel att ha i huvudet.'
+  },
+
+  // --- BUDGET ---
+  {
+    id: 5, topic: 'Budget & hushållsekonomi',
+    q: 'Vilket av följande är ett exempel på en FAST utgift i ett hushållsbudget?',
+    opts: ['A) Restaurangbesök', 'B) Hyra', 'C) Klädinköp', 'D) Biobesök'],
+    correct: 'B',
+    explain: 'Fasta utgifter är kostnader som är lika stora varje månad och svåra att undvika på kort sikt, exempelvis hyra, bolån, telefonabonnemang och hemförsäkring. Rörliga utgifter varierar, som mat, nöje och kläder.',
+    praise: '💪 Rätt! Du vet skillnaden mellan fasta och rörliga utgifter.',
+    encourage: 'Hyran är ett klassiskt exempel på fast utgift — lika stor varje månad oavsett vad som händer.'
+  },
+  {
+    id: 6, topic: 'Budget & hushållsekonomi',
+    q: 'Vad är en "buffert" i privatekonomiskt sammanhang?',
+    opts: ['A) Ett sparkonto hos banken med hög ränta',
+           'B) En reserv av sparade pengar för oväntade utgifter',
+           'C) En försäkring mot inkomstbortfall',
+           'D) Pengar som sparas för pension'],
+    correct: 'B',
+    explain: 'En buffert är pengar du satt undan specifikt för oväntade utgifter — trasig bil, tandläkare, sjukdom. Ekonomiexperter rekommenderar 3–6 månadslöner i buffert. Det skiljer sig från långsiktigt sparande som pension eller bolåneamortering.',
+    praise: '🌟 Utmärkt! En buffert är ett av de viktigaste ekonomiska verktygen.',
+    encourage: 'En buffert handlar om trygghet — pengar för det oväntade, inte för planerade mål.'
+  },
+  {
+    id: 7, topic: 'Budget & hushållsekonomi',
+    q: 'En person tjänar 22 000 kr netto per månad och har fasta utgifter på 14 000 kr. Hur stort är det disponibla beloppet (fritt för rörliga kostnader och sparande)?',
+    opts: ['A) 6 000 kr', 'B) 7 000 kr', 'C) 8 000 kr', 'D) 9 000 kr'],
+    correct: 'C',
+    explain: '22 000 − 14 000 = 8 000 kr. Det disponibla beloppet är vad som finns kvar efter att de fasta utgifterna är betalda. Av dessa 8 000 kr bör en del gå till buffert och sparande, och resten är verkligt "fritt" att använda.',
+    praise: '🧮 Rätt räknat! Att kunna göra den här beräkningen är grunden i all budget.',
+    encourage: 'Enkelt räknat: Nettolön minus fasta utgifter = disponibelt belopp. 22 000 − 14 000 = 8 000 kr.'
+  },
+
+  // --- SPARANDE ---
+  {
+    id: 8, topic: 'Sparande',
+    q: 'Vad utmärker ett ISK (Investeringssparkonto) jämfört med ett vanligt aktiekonto?',
+    opts: ['A) På ett ISK betalar du skatt på varje enskild vinst när du säljer',
+           'B) ISK beskattas med en schablonränta på hela kontobeloppet, oavsett om det gått upp eller ner',
+           'C) ISK är ett statligt garanterat sparkonto utan risk',
+           'D) ISK kräver minst 50 000 kr för att öppnas'],
+    correct: 'B',
+    explain: 'ISK beskattas med en schablonintäkt som beräknas på kontobeloppet, oavsett faktisk avkastning. Det innebär enkel skatt och att du aldrig beskattas på faktisk vinst per transaktion. Nackdelen är att du betalar skatt även under dåliga år.',
+    praise: '📊 Rätt! ISK är en av de populäraste sparformerna i Sverige just tack vare sin enkla skattemodell.',
+    encourage: 'ISK:et är knepigt — poängen är att skatten är fast (schablonbeskattning) oavsett om du gjort vinst eller förlust.'
+  },
+  {
+    id: 9, topic: 'Sparande',
+    q: 'Vad innebär ränta på ränta-effekten?',
+    opts: ['A) Att banken höjer räntan varje år automatiskt',
+           'B) Att du betalar ränta till banken och staten samtidigt',
+           'C) Att det upplupna beloppet (kapital + ränta) ger ränta nästa period, vilket ger exponentiell tillväxt över tid',
+           'D) Att räntan är densamma som inflationen'],
+    correct: 'C',
+    explain: 'Ränta på ränta (compound interest) innebär att du inte bara tjänar ränta på ditt ursprungskapital, utan även på tidigare intjänad ränta. Effekten är liten på kort sikt men dramatisk på 20–40 år. Albert Einstein ska ha kallat det "världens åttonde underverk".',
+    praise: '⚡ Rätt! Ränta på ränta är den viktigaste principen bakom allt långsiktigt sparande.',
+    encourage: 'Ränta på ränta är det som gör att tidigt sparande är så kraftfullt — räntan växer på sig själv.'
+  },
+
+  // --- FÖRSÄKRINGAR ---
+  {
+    id: 10, topic: 'Försäkringar',
+    q: 'Vad täcker en hemförsäkring normalt?',
+    opts: ['A) Bara ditt bohag (möbler, elektronik) vid brand eller stöld',
+           'B) Ditt bohag, ansvarsskydd om du skadar någon, och ofta rättsskydd och reseskydd',
+           'C) Bara skador du orsakar på andras egendom',
+           'D) Olyckor som händer dig på jobbet'],
+    correct: 'B',
+    explain: 'En hemförsäkring är bredare än de flesta tror. Den täcker normalt: (1) Ditt bohag vid brand, stöld, vattenläcka m.m. (2) Ansvarsskydd — om du skadar någon annans egendom. (3) Rättsskydd — juridisk hjälp vid tvister. (4) Ofta ingår reseförsäkring. Arbetsplatsolyckor täcks av arbetsgivarens försäkring.',
+    praise: '🛡️ Perfekt! Hemförsäkringen är mer heltäckande än folk ofta tror.',
+    encourage: 'Hemförsäkringen skyddar inte bara saker — ansvarsskyddet är minst lika viktigt!'
+  },
+  {
+    id: 11, topic: 'Försäkringar',
+    q: 'Vad kallas den del av skadan som du alltid betalar själv vid en försäkringsersättning?',
+    opts: ['A) Premie', 'B) Grundavdrag', 'C) Självrisk', 'D) Karenstid'],
+    correct: 'C',
+    explain: 'Självrisken är den del av skadekostnaden som du alltid betalar själv, oavsett hur stor skadan är. Hög självrisk → lägre månadspremie. Låg självrisk → högre premie. Premie är det du betalar för att ha försäkringen. Karenstid gäller sjukförsäkring och a-kassa.',
+    praise: '✅ Rätt! Självrisk och premie — två begrepp alla måste kunna.',
+    encourage: 'Självrisk är vad du betalar vid skada. Premie är vad du betalar för att ha försäkringen. De förväxlas ofta!'
+  },
+
+  // --- LÅN & KREDIT ---
+  {
+    id: 12, topic: 'Lån och kredit',
+    q: 'Vad menas med "effektiv ränta"?',
+    opts: ['A) Den ränta som banken faktiskt tjänar på lånet',
+           'B) Den totala lånekostnaden per år i procent, inkl. alla avgifter — det bästa nyckeltalet för att jämföra lån',
+           'C) Räntan efter inflation',
+           'D) Den lägsta räntan banken kan erbjuda'],
+    correct: 'B',
+    explain: 'Effektiv ränta är standardmåttet för att jämföra lån rättvist. Den inkluderar nominell ränta PLUS alla avgifter (uppläggningsavgift, aviavgift m.m.) uttryckt som en årsränta. Två lån kan ha samma nominella ränta men olika effektiv ränta pga avgifter. Alltid jämför effektiv ränta!',
+    praise: '💡 Utmärkt! Effektiv ränta är konsumentens viktigaste jämförelsemått.',
+    encourage: 'Effektiv ränta inkluderar ALLA kostnader — inte bara räntan. Det är därför det är det rätta nyckeltalet.'
+  },
+  {
+    id: 13, topic: 'Lån och kredit',
+    q: 'Du köper en TV för 8 000 kr på avbetalning med 24% årsränta och betalar 400 kr/mån. Vilket påstående stämmer?',
+    opts: ['A) Du betalar totalt 8 000 kr eftersom det är vad TV:n kostar',
+           'B) Du betalar mer än 8 000 kr eftersom räntan läggs på skulden varje månad',
+           'C) Du betalar mindre än 8 000 kr om du betalar snabbt',
+           'D) Ränta tillkommer bara om du missar en betalning'],
+    correct: 'B',
+    explain: 'Med 24% årsränta (= 2% per månad) läggs ränta på det kvarstående beloppet varje månad. Med 400 kr/mån tar det ca 26 månader och du betalar ~10 400 kr totalt — 2 400 kr mer än TV:n kostar. Ränta på ränta gör krediter dyra.',
+    praise: '🎯 Rätt! Det är precis den här insikten som skiljer ekonomiskt kloka från okloka beslut.',
+    encourage: 'Räntan tickar på varje månad på det kvarstående beloppet — du betalar alltid MER än ursprungspriset.'
+  },
+  {
+    id: 14, topic: 'Lån och kredit',
+    q: 'Vad är ett bolån?',
+    opts: ['A) Ett lån för att köpa möbler och hushållsartiklar',
+           'B) Ett lån med bostaden som säkerhet, vanligen för att köpa bostad',
+           'C) En typ av studielån',
+           'D) Ett lån som tas via Kronofogden'],
+    correct: 'B',
+    explain: 'Ett bolån är ett lån med bostaden som säkerhet (pant). Det innebär att banken kan ta bostaden om du inte betalar. Bolåneräntor är lägre än konsumtionslån just för att säkerheten minskar bankens risk. I Sverige kräver bankerna minst 15% kontantinsats (handpenning) vid bostadsköp.',
+    praise: '🏠 Rätt! Bolån är för de flesta det enskilt största lånet i livet.',
+    encourage: 'Bolån = lån med bostad som säkerhet. Det är vad som gör räntan lägre än blancolån.'
+  },
+  {
+    id: 15, topic: 'Lån och kredit',
+    q: 'Vad menas med amortering?',
+    opts: ['A) Att betala ränta på lånet', 'B) Att teckna en försäkring på lånet',
+           'C) Att betala av på själva lånesumman (kapitalet)', 'D) Att refinansiera lånet till lägre ränta'],
+    correct: 'C',
+    explain: 'Amortering = du betalar av på skulden. Ränta = vad det kostar att låna. Din månatliga bolånebetalning innehåller vanligen BÅDA: ränta + amortering. I Sverige finns amorteringskrav: lånar du mer än 70% av bostadens värde måste du amortera minst 2% per år.',
+    praise: '💰 Rätt! Skillnaden mellan amortering och ränta är fundamental.',
+    encourage: 'Kom ihåg: ränta = lånekostnad, amortering = du minskar skulden. Två olika saker!'
+  },
+
+  // --- REPORÄNTA & RIKSBANK ---
+  {
+    id: 16, topic: 'Riksbanken & reporänta',
+    q: 'Vad är Riksbankens reporänta?',
+    opts: ['A) Den ränta som bankerna tar av privatpersoner på bolån',
+           'B) Riksbankens styrränta som påverkar hela ränteläget i ekonomin',
+           'C) Den ränta som staten betalar på statsskulden',
+           'D) Den genomsnittliga sparräntan hos svenska banker'],
+    correct: 'B',
+    explain: 'Reporäntan är Riksbankens styrränta — den ränta centralbankens styr penningpolitiken med. När reporäntan höjs blir det dyrare för banker att låna pengar, vilket leder till högre bolåne- och konsumtionslåneräntor. Riksbanken höjde reporäntan snabbt 2022–2023 (0% → 4,0%) för att bekämpa inflationen.',
+    praise: '🏦 Utmärkt! Reporäntan är ett av de viktigaste ekonomiska styrmedlen.',
+    encourage: 'Reporäntan är Riksbankens "gasreglage" för ekonomin — höjs den bromsar ekonomin, sänks den stimuleras den.'
+  },
+  {
+    id: 17, topic: 'Riksbanken & reporänta',
+    q: 'Varför höjde Riksbanken reporäntan kraftigt under 2022–2023?',
+    opts: ['A) För att locka utländska investerare till Sverige',
+           'B) För att minska statsskulden',
+           'C) För att bekämpa hög inflation — stigande priser i ekonomin',
+           'D) För att stärka Sveriges kreditbetyg'],
+    correct: 'C',
+    explain: 'Inflationen i Sverige nådde ca 10% under 2022 — den högsta på 30 år. Riksbankens uppdrag är att hålla inflationen runt 2%. Höjd reporänta gör det dyrare att låna → folk konsumerar och investerar mindre → prispressen minskar. 2024–2025 sänktes räntan tillbaka mot 2,5%.',
+    praise: '📈 Rätt! Sambandet mellan ränta och inflation är centralt i samhällsekonomin.',
+    encourage: 'Hög inflation → Riksbanken höjer räntan → dyrare att låna → folk spenderar mindre → priserna faller. Det är kedjan.'
+  },
+
+  // --- BETALSÄTT & KONSUMENTRÄTT ---
+  {
+    id: 18, topic: 'Betalsätt och konsumenträtt',
+    q: 'Vad innebär det att handla "på kredit"?',
+    opts: ['A) Att betala kontant direkt i butiken',
+           'B) Att låna pengar för att köpa något och betala tillbaka senare, ofta med ränta',
+           'C) Att använda bankkortet istället för kontanter',
+           'D) Att köpa varor på rea'],
+    correct: 'B',
+    explain: 'Att handla på kredit innebär att du tar emot varan nu men betalar senare. Det kan vara kreditkort, avbetalning, eller "köp nu betala senare"-tjänster (BNPL). Kreditköp är bekvämt men innebär i de flesta fall ränta — ibland mycket hög. Alltid läs villkoren noga!',
+    praise: '✅ Rätt! Att förstå kredit är avgörande för att undvika skuldspiraler.',
+    encourage: 'Kredit = nu får du varan, men du betalar sen — och vanligtvis med ränta ovanpå.'
+  },
+  {
+    id: 19, topic: 'Betalsätt och konsumenträtt',
+    q: 'Du köper en TV på nätet och den slutar fungera efter 14 månader. Vilket skydd har du enligt Konsumentköplagen?',
+    opts: ['A) Inget — garantin gäller bara 12 månader',
+           'B) 2 års reklamationsrätt — butiken ansvarar om TV:n var defekt när du köpte den',
+           'C) 5 års reklamationsrätt på all elektronik',
+           'D) Bara om du köpt utökad garanti'],
+    correct: 'B',
+    explain: 'Enligt Konsumentköplagen (och EU-regler) har du 3 års reklamationsrätt i Sverige (höjt från 2 år 2023). Under de första 2 åren antas felet ha funnits vid köptillfället — bevisbördan ligger på butiken. Reklamationsrätten gäller alltid, oavsett garanti. Garanti är ett extra erbjudande från tillverkaren.',
+    praise: '⚖️ Rätt! Reklamationsrätten är ett starkt konsumentskydd — viktigt att känna till.',
+    encourage: 'Reklamationsrätten är LAGSTADGAD i 3 år (Sverige) — den kan inte tas bort av butiken. Garanti är bara ett bonusskydd.'
+  },
+  {
+    id: 20, topic: 'Betalsätt och konsumenträtt',
+    q: 'Vad är Kronofogden och vad händer om du hamnar där?',
+    opts: ['A) En bank som ger lån till personer med låg kreditvärdighet',
+           'B) En statlig myndighet som driver in obetalda skulder och kan utmäta egendom',
+           'C) En inkassobyrå som köper fordringar från butiker',
+           'D) En försäkringskassa för skulder'],
+    correct: 'B',
+    explain: 'Kronofogden är en statlig myndighet. Om du inte betalar en skuld kan borgenären (t.ex. ett inkassobolag) ansöka om "betalningsföreläggande". Kronofogden kontaktar dig — bestrider du inte skulden kan de utmäta (ta) lön eller egendom. En betalningsanmärkning stannar i 3 år och försvårar att få lån, hyra bostad och teckna abonnemang.',
+    praise: '🚨 Rätt! Kronofogden är något man verkligen vill undvika — bra att du vet hur det fungerar.',
+    encourage: 'Kronofogden = statlig skulddrivning. En betalningsanmärkning därifrån påverkar livet i 3 år.'
+  },
+
+  // --- EKONOMISK JÄMSTÄLLDHET ---
+  {
+    id: 21, topic: 'Ekonomisk jämställdhet',
+    q: 'Vad menas med "ekonomiskt våld" i en nära relation?',
+    opts: ['A) Att stjäla pengar från okända',
+           'B) Att kontrollera en partners ekonomi, hindra tillgång till pengar eller ta lån i deras namn utan lov',
+           'C) Att investera i aktier med hög risk',
+           'D) Att inte betala tillbaka ett lån i tid'],
+    correct: 'B',
+    explain: 'Ekonomiskt våld är en form av våld i nära relationer. Det inkluderar: kontrollera partnerns utgifter, ta lån i partnerns namn utan tillstånd, hindra partnern från att arbeta, eller hålla partnern ekonomiskt beroende. Det är straffbart och kan leda till åtal.',
+    praise: '❤️ Rätt! Ekonomiskt våld är ett allvarligt samhällsproblem som fler borde känna till.',
+    encourage: 'Ekonomiskt våld handlar om kontroll — att begränsa en persons ekonomiska frihet och självständighet.'
+  },
+  {
+    id: 22, topic: 'Ekonomisk jämställdhet',
+    q: 'Varför har kvinnor i genomsnitt lägre pension än män i Sverige?',
+    opts: ['A) Kvinnor sparar mindre på ISK och aktier',
+           'B) Pensionsreglerna är olika för kvinnor och män',
+           'C) Lönegap, fler deltider och fler föräldraledighetsperioder ger lägre livsinkomst och därmed lägre pensionspoäng',
+           'D) Kvinnor väljer att gå i pension tidigare'],
+    correct: 'C',
+    explain: 'Pension i Sverige baseras på inkomst — ju mer du tjänar, desto mer pensionspoäng. Tre faktorer slår mot kvinnor genomsnittligt: (1) lönegap (kvinnodominerade yrken lönesätts lägre), (2) fler deltidsarbeten, (3) fler och längre föräldraledigheter. Konsekvensen är en genomsnittligt 30% lägre pension för kvinnor.',
+    praise: '🏆 Rätt! Det här är ett av de viktigaste jämställdhetsämnena kopplat till privatekonomi.',
+    encourage: 'Pensionsgapet beror på livsinkomstgapet — lägre lön + mer deltid + mer föräldraledighet = lägre pension.'
+  },
+  {
+    id: 23, topic: 'Ekonomisk jämställdhet',
+    q: 'Vad menas med "lönegapet" mellan kvinnor och män?',
+    opts: ['A) Att män och kvinnor betalar olika inkomstskatt',
+           'B) Att kvinnor i genomsnitt har lägre lön än män, delvis förklarat av yrkesval och deltid men delvis oförklarat',
+           'C) Att anställningskontrakt ser olika ut för män och kvinnor',
+           'D) Att mäns löner höjs mer vid inflation'],
+    correct: 'B',
+    explain: 'Lönegapet mäts på två sätt: (1) Okorrigerat: kvinnor tjänar ca 88% av männens lön. (2) Korrigerat för yrke, arbetstid och erfarenhet: ca 95–97% — ett "oförklarat" gap kvarstår. Debatten handlar om i vilken utsträckning yrkessegregation, normer och direkt diskriminering förklarar skillnaden.',
+    praise: '✨ Utmärkt analys! Lönegapets orsaker är komplexa och viktiga att förstå.',
+    encourage: 'Lönegapet är delvis förklarat (yrkesval, deltid) och delvis oförklarat — det oförklarade är kärnan i jämställdhetsdebatten.'
+  },
+
+  // --- INFLATION & KONSUMENTPRISINDEX ---
+  {
+    id: 24, topic: 'Inflation & köpkraft',
+    q: 'Vad menas med inflation?',
+    opts: ['A) Att BNP ökar snabbare än befolkningstillväxten',
+           'B) En allmän och varaktig ökning av prisnivån i ekonomin, vilket minskar pengarnas köpkraft',
+           'C) Att börsen går upp mer än 10% på ett år',
+           'D) Att statsskulden ökar'],
+    correct: 'B',
+    explain: 'Inflation = priserna stiger generellt → du kan köpa mindre för samma summa pengar. 5% inflation på ett år betyder att det du köpte för 100 kr nu kostar 105 kr. Riksbankens mål är 2% inflation per år. Inflationen mäts med KPI (konsumentprisindex) som följer ett representativt "varukorgs"-pris.',
+    praise: '📊 Rätt! Inflation är ett av de viktigaste begreppen i hela samhällsekonomin.',
+    encourage: 'Inflation = pengarnas värde minskar. 5% inflation = du behöver 5% mer pengar för att köpa samma saker.'
+  },
+  {
+    id: 25, topic: 'Inflation & köpkraft',
+    q: 'Din lön höjs med 2% men inflationen är 5%. Vad händer med din köpkraft?',
+    opts: ['A) Den ökar med 2%', 'B) Den är oförändrad', 'C) Den minskar med ca 3%', 'D) Den ökar med 5%'],
+    correct: 'C',
+    explain: 'Real löneutveckling = nominell löneökning minus inflation. 2% − 5% = −3%. Din lön i kronor ökade, men priserna steg mer — du kan köpa mindre än förra året. Det kallas en reallönesänkning. Under inflationstoppen 2022–2023 drabbades många löntagare av negativ reallöneutveckling.',
+    praise: '🧮 Exakt rätt! Reallön vs. nominell lön är ett viktigt distinktion.',
+    encourage: 'Titta alltid på reallönen — löneökning minus inflation. Det är den som avgör om du kan köpa mer eller mindre.'
+  },
+];
+
+// Shuffle array (Fisher-Yates)
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length-1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+// ============================================================
+// STATE
+// ============================================================
+const GS = {
+  screen: 'intro',   // intro | quiz | result
+  questions: [],     // shuffled subset
+  current: 0,        // current question index
+  answers: [],       // {qid, chosen, correct, isCorrect}[]
+  answered: false,   // current question answered?
+};
+
+const TOTAL_Q = 20;  // questions per test run
+
+function initQuiz() {
+  GS.questions = shuffle(ALL_QUESTIONS).slice(0, TOTAL_Q);
+  GS.current = 0;
+  GS.answers = [];
+  GS.answered = false;
+  GS.screen = 'quiz';
+}
+
+// ============================================================
+// RENDER
+// ============================================================
+function render() {
+  const app = document.getElementById('app');
+  app.innerHTML = '';
+  app.className = 'fade-in';
+  void app.offsetWidth;
+  app.className = 'fade-in';
+
+  if (GS.screen === 'intro') renderIntro(app);
+  else if (GS.screen === 'quiz') renderQuiz(app);
+  else if (GS.screen === 'result') renderResult(app);
+
+  updateHeader();
+}
+
+function updateHeader() {
+  const pill = document.getElementById('headerScore');
+  if (GS.screen === 'quiz' && GS.answers.length > 0) {
+    pill.style.display = 'block';
+    document.getElementById('headerCorrect').textContent = GS.answers.filter(a=>a.isCorrect).length;
+    document.getElementById('headerTotal').textContent = GS.answers.length;
+  } else {
+    pill.style.display = 'none';
+  }
+}
+
+// ============================================================
+// INTRO
+// ============================================================
+function renderIntro(app) {
+  const div = document.createElement('div');
+  div.innerHTML = `
+    <div class="intro-hero">
+      <h1>PROV: <span>PRIVATEKONOMI</span></h1>
+      <p class="intro-sub">Samhällskunskap 1a · Gy25 · ${TOTAL_Q} frågor · Godkänt: 70%</p>
+    </div>
+    <div class="card">
+      <div class="info-grid">
+        <div class="info-cell"><div class="label">Antal frågor</div><div class="value">${TOTAL_Q}</div></div>
+        <div class="info-cell"><div class="label">Godkäntgräns</div><div class="value" style="color:var(--success)">70%</div></div>
+        <div class="info-cell"><div class="label">Ämnesblock</div><div class="value" style="font-size:16px">8 st</div></div>
+      </div>
+      <div style="background:var(--info-bg);border:1px solid var(--info-border);border-radius:10px;padding:14px 16px;margin-top:4px;font-size:14px;color:var(--text);line-height:1.6">
+        <strong>Ämnesblock:</strong> Inkomst & skatt · Budget · Sparande · Försäkringar · Lån & kredit · Riksbanken · Konsumenträtt · Ekonomisk jämställdhet · Inflation
+      </div>
+      <div style="background:var(--warning-bg);border:1px solid var(--warning-border);border-radius:10px;padding:14px 16px;margin-top:12px;font-size:14px;color:#7A4F08;line-height:1.6">
+        ⚠️ <strong>Obs!</strong> Du kan inte ändra ett svar efter att du lämnat det. Vid fel visas rätt svar. Du får göra om provet hur många gånger du vill — men varje ny runda blandas frågorna om.
+      </div>
+    </div>
+    <div style="margin-top:8px">
+      <button class="btn btn-full" onclick="initQuiz();render()" style="font-size:17px;padding:18px">
+        STARTA PROVET →
+      </button>
+    </div>
+    <a href="vuxenlivet_spel.html" class="link-teaser" style="text-decoration:none;display:flex">
+      <div class="lt-emoji">🎮</div>
+      <div>
+        <div class="lt-title">Klara Vuxenlivet-appen först!</div>
+        <div class="lt-sub">Du måste ha klarat alla 5 nivåer i Vuxenlivet-appen med godkänt resultat för att det ska räknas att du gjort det här provet. Det är din biljett vidare!</div>
+      </div>
+      <div style="margin-left:auto;font-size:22px;align-self:center">→</div>
+    </a>
+  `;
+  app.appendChild(div);
+}
+
+// ============================================================
+// QUIZ
+// ============================================================
+const LETTERS = ['A','B','C','D'];
+const PRAISE = [
+  '🌟 Fantastiskt!', '🎯 Spot on!', '💪 Rätt!', '✅ Korrekt!',
+  '🔥 Briljant!', '⚡ Perfekt!', '🏆 Toppen!', '🎉 Exakt!',
+  '👏 Suverän!', '💡 Precis rätt!', '🚀 Utmärkt!', '💎 Genialt!'
+];
+const ENCOURAGE = [
+  'Inte den här gången — men du lär dig av varje misstag!',
+  'Det här är knepigt — nu vet du för nästa gång!',
+  'Fel, men det är så man lär sig. Läs förklaringen noga!',
+  'Nästan! Förklaringen nedan hjälper dig komma ihåg.',
+  'Det är OK — provet kan göras om så många gånger du vill!',
+  'Tufft! Men varje fel gör hjärnan starkare.',
+  'Nu vet du rätt svar för evigt! Det är lärandet i praktiken.',
+];
+
+function rand(arr) { return arr[Math.floor(Math.random()*arr.length)]; }
+
+function renderQuiz(app) {
+  const q = GS.questions[GS.current];
+  const answered = GS.answered;
+  const chosen = answered ? GS.answers[GS.answers.length-1] : null;
+  const pct = Math.round(GS.current / TOTAL_Q * 100);
+
+  const div = document.createElement('div');
+  div.innerHTML = `
+    <div class="progress-label">
+      <span>Fråga ${GS.current + 1} av ${TOTAL_Q}</span>
+      <span style="color:${GS.answers.length>0 ? 'var(--success)':  'var(--muted)'}">
+        ${GS.answers.filter(a=>a.isCorrect).length} rätt hittills
+      </span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+
+    <div class="card ${answered ? (chosen.isCorrect ? 'accent-ok' : 'accent-err') : ''}">
+      <div class="q-meta">📚 ${q.topic}</div>
+      <div class="q-text"><span class="q-num">${GS.current+1}.</span>${q.q}</div>
+
+      <div class="options">
+        ${q.opts.map((opt, i) => {
+          const letter = LETTERS[i];
+          const isChosen = answered && chosen.chosen === letter;
+          const isCorrect = letter === q.correct;
+          let cls = '';
+          if (answered) {
+            if (isChosen && isCorrect) cls = 'correct locked';
+            else if (isChosen && !isCorrect) cls = 'wrong locked';
+            else if (isCorrect) cls = 'show-correct locked';
+            else cls = 'locked';
+          }
+          return `<button class="opt ${cls}" onclick="${answered ? '' : `pickAnswer('${letter}')`}">
+            <div class="opt-letter">${answered && isCorrect ? '✓' : answered && isChosen && !isCorrect ? '✗' : letter}</div>
+            <div>${opt.replace(/^[A-D]\) /, '')}</div>
+          </button>`;
+        }).join('')}
+      </div>
+
+      ${answered ? `
+        <div class="feedback-bubble ${chosen.isCorrect ? 'ok' : 'err'}">
+          <div class="fb-icon">${chosen.isCorrect ? '🎉' : '📖'}</div>
+          <div class="fb-text">
+            <strong>${chosen.isCorrect ? rand(PRAISE) : rand(ENCOURAGE)}</strong>
+            ${q.explain}
+          </div>
+        </div>
+        <div class="btn-row">
+          ${GS.current + 1 < TOTAL_Q
+            ? `<button class="btn btn-full" onclick="nextQ()">NÄSTA FRÅGA →</button>`
+            : `<button class="btn btn-full btn-success" onclick="showResult()">SE RESULTAT 🏆</button>`
+          }
+        </div>
+      ` : ''}
+    </div>
+
+    ${answered && GS.current + 1 < TOTAL_Q ? '' : ''}
+  `;
+  app.appendChild(div);
+}
+
+function pickAnswer(letter) {
+  const q = GS.questions[GS.current];
+  const isCorrect = letter === q.correct;
+  GS.answers.push({ qid: q.id, chosen: letter, correct: q.correct, isCorrect });
+  GS.answered = true;
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function nextQ() {
+  GS.current++;
+  GS.answered = false;
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showResult() {
+  GS.screen = 'result';
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ============================================================
+// RESULT
+// ============================================================
+function renderResult(app) {
+  const correct = GS.answers.filter(a => a.isCorrect).length;
+  const total = GS.answers.length;
+  const pct = Math.round(correct / total * 100);
+  const passed = pct >= 70;
+
+  const div = document.createElement('div');
+
+  // Score hero
+  div.innerHTML += `
+    <div class="card">
+      <div class="score-hero">
+        <div class="score-circle ${passed ? '' : 'fail'}">
+          <div class="score-pct">${pct}%</div>
+          <div class="score-label">${correct}/${total}</div>
+        </div>
+        <div class="score-title">${passed ? '🎓 Godkänt!' : '📚 Ej godkänt'}</div>
+        <p class="score-sub">${passed
+          ? `Imponerande! Du klarade provet med ${pct}% rätt. ${pct === 100 ? ' PERFEKT RESULTAT — alla rätt!' : ''}`
+          : `Du fick ${pct}% rätt. Godkäntgränsen är 70%. Läs igenom förklaringarna nedan och försök igen!`
+        }</p>
+        ${!passed ? `
+          <button class="btn btn-full" style="margin-top:16px" onclick="initQuiz();render()">
+            🔄 GÖR OM PROVET
+          </button>
+        ` : `
+          <button class="btn btn-secondary" style="margin-top:16px" onclick="initQuiz();render()">
+            🔄 Gör om för att öva mer
+          </button>
+        `}
+      </div>
+    </div>
+  `;
+
+  // Full answer review
+  const reviewHTML = GS.answers.map((ans, i) => {
+    const q = ALL_QUESTIONS.find(q => q.id === ans.qid);
+    const chosenText = q.opts.find(o => o.startsWith(ans.chosen));
+    const correctText = q.opts.find(o => o.startsWith(ans.correct));
+    return `
+      <div class="result-row">
+        <div class="result-icon">${ans.isCorrect ? '✅' : '❌'}</div>
+        <div style="flex:1">
+          <div class="result-q">
+            <span style="color:var(--muted);font-weight:500;font-size:12px">${q.topic} · Fråga ${i+1}</span><br>
+            ${q.q}
+          </div>
+          <div class="result-answer">
+            ${ans.isCorrect
+              ? `<span class="correct-ans">✓ ${correctText}</span>`
+              : `<span class="wrong-ans">${chosenText}</span> → <span class="correct-ans">✓ ${correctText}</span>`
+            }
+          </div>
+          <div style="font-size:13px;color:var(--muted);margin-top:5px;line-height:1.5;background:var(--bg);padding:8px 10px;border-radius:8px">
+            💡 ${q.explain}
+          </div>
+        </div>
+        <div style="flex-shrink:0;margin-left:8px">
+          <span class="badge ${ans.isCorrect ? 'badge-ok' : 'badge-err'}">${ans.isCorrect ? 'RÄTT' : 'FEL'}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  div.innerHTML += `
+    <div class="card">
+      <h3 style="margin-bottom:4px">📋 Alla frågor — rätt och fel</h3>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Rätt svar visas för varje fråga, även de du svarade fel på.</p>
+      ${reviewHTML}
+    </div>
+
+    <a href="vuxenlivet_spel.html" class="link-teaser" style="text-decoration:none;display:flex">
+      <div class="lt-emoji">🎮</div>
+      <div>
+        <div class="lt-title">Kom ihåg — klara Vuxenlivet-appen först!</div>
+        <div class="lt-sub">Du måste ha klarat alla 5 nivåer i Vuxenlivet-appen med godkänt resultat för att det ska räknas att du gjort det här provet. Det är din biljett vidare!</div>
+      </div>
+      <div style="margin-left:auto;font-size:22px;align-self:center">→</div>
+    </a>
+
+    <div class="btn-row" style="margin-top:16px">
+      <button class="btn" onclick="initQuiz();render()">🔄 Nytt försök</button>
+      <button class="btn btn-secondary" onclick="GS.screen='intro';render()">← Startsidan</button>
+      <button style="background:none;border:1px solid var(--border-strong);border-radius:8px;padding:10px 16px;font-size:13px;cursor:pointer;color:var(--muted);font-family:'DM Sans',sans-serif" onclick="window.print()">🖨️ Skriv ut</button>
+    </div>
+  `;
+
+  app.appendChild(div);
+}
+
+// ============================================================
+// INIT
+// ============================================================
+render();
+</script>
+</body>
+</html>
