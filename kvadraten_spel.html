@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KVADRATEN — Andragradsekvationer</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F3F6F3;--surface:#fff;--border:#C8D8C8;--bs:#9AB89A;
+  --text:#1A2B1A;--muted:#4A5E4A;
+  --math:#1A6B3A;--math-bg:#E8F5EE;--math-bd:#90CFA8;
+  --ok:#1A7A4A;--ok-bg:#E8F5EE;--ok-bd:#A3D4B5;
+  --err:#C0392B;--err-bg:#FDECEA;--err-bd:#F5A89A;
+  --warn:#92600A;--warn-bg:#FEF3E2;--warn-bd:#F5C97A;
+  --gold:#D97706;--info-bg:#EBF4FD;
+  --purple:#6B3FA0;--pu-bg:#F3E8FF;--pu-bd:#C4B5FD;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);font-family:'DM Sans',system-ui,sans-serif;color:var(--text);font-size:16px;min-height:100vh;}
+h1,h2,h3,.syne{font-family:'Syne',sans-serif;}
+#header{padding:11px 18px;background:var(--surface);border-bottom:2px solid var(--border);position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+.logo{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;}
+.logo span{color:var(--math);}
+.rank-pill{display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--bs);border-radius:20px;padding:6px 14px;}
+.rank-icon{font-size:18px;}
+.rank-label{font-family:'Syne',sans-serif;font-size:12px;font-weight:800;color:var(--math);}
+.xp-bar-wrap{flex:1;max-width:110px;}
+.xp-track{background:var(--border);border-radius:4px;height:6px;}
+.xp-fill{height:6px;border-radius:4px;background:var(--math);transition:width 0.5s;}
+.xp-label{font-size:10px;color:var(--muted);margin-top:2px;}
+#app{max-width:740px;margin:0 auto;padding:22px 16px 80px;}
+.fade{animation:fi 0.3s ease both;}
+@keyframes fi{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,0.04);}
+.card.math-accent{border-left:4px solid var(--math);}
+.card.ok-accent{border-left:4px solid var(--ok);}
+.bio-card{background:linear-gradient(135deg,#E8F5EE 0%,#F0FFF4 100%);border:2px solid var(--math-bd);border-radius:14px;padding:20px 22px;margin-bottom:14px;display:flex;gap:16px;align-items:flex-start;}
+.bio-portrait{font-size:50px;flex-shrink:0;}
+.bio-name{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--math);margin-bottom:1px;}
+.bio-years{font-size:12px;color:var(--muted);font-weight:600;margin-bottom:7px;}
+.bio-text{font-size:13px;color:var(--text);line-height:1.65;}
+.bio-quote{font-style:italic;color:var(--math);font-size:13px;border-left:3px solid var(--math);padding-left:10px;margin-top:8px;}
+.concept-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-bottom:12px;}
+.concept-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:var(--math);margin-bottom:6px;}
+.concept-body{font-size:14px;line-height:1.65;}
+.formula{background:var(--math-bg);border:1.5px solid var(--math-bd);border-radius:9px;padding:12px 16px;font-family:'Syne',sans-serif;font-size:17px;font-weight:800;color:var(--math);text-align:center;margin:10px 0;letter-spacing:0.5px;}
+.formula-explain{font-size:12px;color:var(--muted);text-align:center;margin-top:4px;line-height:1.6;}
+.method-badge{display:inline-block;padding:3px 11px;border-radius:12px;font-size:11px;font-weight:800;font-family:'Syne',sans-serif;background:var(--math-bg);color:var(--math);border:1px solid var(--math-bd);}
+.method-badge.m1{background:#E8F5EE;color:#1A6B3A;border-color:#90CFA8;}
+.method-badge.m2{background:#EBF4FD;color:#1A4B8C;border-color:#A3C4E8;}
+.method-badge.m3{background:#FEF3E2;color:#92600A;border-color:#F5C97A;}
+.method-badge.m4{background:#F3E8FF;color:#6B3FA0;border-color:#C4B5FD;}
+.chip-gold{background:var(--warn-bg);color:var(--warn);border:1px solid var(--warn-bd);display:inline-block;padding:3px 11px;border-radius:12px;font-size:11px;font-weight:800;font-family:'Syne',sans-serif;}
+.q-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin-bottom:14px;}
+.q-meta{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+.q-txt{font-size:17px;font-weight:600;line-height:1.45;margin-bottom:14px;}
+.q-eq{background:var(--math-bg);border:1px solid var(--math-bd);border-radius:8px;padding:10px 16px;font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--math);text-align:center;margin-bottom:14px;}
+.options{display:flex;flex-direction:column;gap:7px;}
+.opt{background:var(--surface);border:2px solid var(--border);border-radius:9px;padding:11px 15px;cursor:pointer;font-size:14px;transition:all 0.12s;text-align:left;color:var(--text);font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:10px;}
+.opt-letter{width:26px;height:26px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:11px;font-weight:800;background:var(--bg);border:1.5px solid var(--bs);color:var(--muted);transition:all 0.12s;}
+.opt:hover:not(.locked){border-color:var(--math);background:var(--math-bg);}
+.opt:hover:not(.locked) .opt-letter{background:var(--math);color:#fff;border-color:var(--math);}
+.opt.correct{border-color:var(--ok);background:var(--ok-bg);}
+.opt.correct .opt-letter{background:var(--ok);color:#fff;border-color:var(--ok);}
+.opt.wrong{border-color:var(--err);background:var(--err-bg);}
+.opt.wrong .opt-letter{background:var(--err);color:#fff;border-color:var(--err);}
+.opt.show-correct{border-color:var(--ok);background:var(--ok-bg);opacity:0.7;}
+.opt.show-correct .opt-letter{background:var(--ok);color:#fff;border-color:var(--ok);}
+.opt.locked{pointer-events:none;}
+.fb{padding:12px 15px;border-radius:9px;margin-top:10px;font-size:14px;font-weight:500;line-height:1.55;}
+.fb.ok{background:var(--ok-bg);color:#0E5C30;border:1px solid var(--ok-bd);}
+.fb.err{background:var(--err-bg);color:#9B2010;border:1px solid var(--err-bd);}
+.fb.soc{background:var(--pu-bg);border:2px dashed var(--purple);color:var(--purple);border-radius:9px;}
+.fb strong{font-weight:700;display:block;margin-bottom:2px;}
+.fb .hq{font-style:italic;margin-top:5px;font-size:13px;}
+.xp-burst{display:inline-block;background:var(--gold);color:#fff;font-family:'Syne',sans-serif;font-size:12px;font-weight:800;padding:3px 10px;border-radius:18px;margin-left:7px;animation:pop 0.4s ease;}
+@keyframes pop{0%{transform:scale(0.5);opacity:0}70%{transform:scale(1.2)}100%{transform:scale(1);opacity:1}}
+.prog-wrap{display:flex;align-items:center;gap:9px;margin-bottom:12px;}
+.prog-track{flex:1;background:var(--border);border-radius:4px;height:6px;}
+.prog-fill{height:6px;border-radius:4px;background:var(--math);transition:width 0.4s;}
+.btn{background:var(--math);color:#fff;border:none;border-radius:9px;padding:11px 20px;font-family:'Syne',sans-serif;font-size:14px;font-weight:800;cursor:pointer;transition:all 0.15s;}
+.btn:hover{filter:brightness(1.1);transform:translateY(-1px);}
+.btn:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
+.btn-full{width:100%;margin-top:11px;padding:13px;}
+.btn-ok{background:var(--ok);}
+.btn-sec{background:var(--surface);border:2px solid var(--bs);color:var(--text);}
+.btn-sec:hover{border-color:var(--math);color:var(--math);}
+.btn-gold{background:var(--gold);}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px;}
+.score-c{width:84px;height:84px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 11px;}
+.score-c.pass{background:var(--ok-bg);border:5px solid var(--ok);}
+.score-c.fail{background:var(--err-bg);border:5px solid var(--err);}
+.score-pct{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;}
+.score-c.pass .score-pct{color:var(--ok);}
+.score-c.fail .score-pct{color:var(--err);}
+.review-row{display:flex;gap:9px;padding:9px 0;border-bottom:1px solid var(--border);align-items:flex-start;}
+.review-row:last-child{border-bottom:none;}
+.sbadge{display:inline-block;padding:2px 8px;border-radius:9px;font-size:11px;font-weight:800;font-family:'Syne',sans-serif;}
+.sb-ok{background:var(--ok-bg);color:var(--ok);}
+.sb-err{background:var(--err-bg);color:var(--err);}
+.rank-up{text-align:center;padding:28px 16px;}
+.rank-up-icon{font-size:62px;margin-bottom:10px;animation:spin 0.6s ease;}
+@keyframes spin{from{transform:rotateY(0)}to{transform:rotateY(360deg)}}
+.intro-hero{text-align:center;padding:32px 14px 20px;}
+.intro-hero h1{font-size:clamp(28px,6vw,46px);font-weight:800;letter-spacing:-1.5px;line-height:1.1;}
+.intro-hero h1 span{color:var(--math);}
+.moment-preview{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin:14px 0;}
+.mp-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;}
+.mp-num{font-family:'Syne',sans-serif;font-size:11px;font-weight:800;color:var(--math);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px;}
+.mp-title{font-weight:700;font-size:14px;}
+.mp-sub{font-size:12px;color:var(--muted);}
+.step-flow{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0;}
+.step-box{background:var(--math-bg);border:1px solid var(--math-bd);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;color:var(--math);display:flex;align-items:center;gap:5px;}
+.divider{border:none;border-top:1px solid var(--border);margin:14px 0;}
+@media(max-width:500px){.moment-preview{grid-template-columns:1fr;}.bio-card{flex-direction:column;}}
+</style>
+</head>
+<body>
+<div id="header">
+  <div class="logo">KVADR<span>ATEN</span></div>
+  <div class="rank-pill">
+    <div class="rank-icon" id="rankIcon">🔢</div>
+    <div>
+      <div class="rank-label" id="rankLabel">Nybörjaren</div>
+      <div class="xp-bar-wrap">
+        <div class="xp-track"><div class="xp-fill" id="xpFill" style="width:0%"></div></div>
+        <div class="xp-label" id="xpLabel">0 XP</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="app"></div>
+<script>
+// ── RANKS ────────────────────────────────────────────────────
+const RANKS = [
+  {min:0,   icon:'🔢', label:'Nybörjaren',   next:120},
+  {min:120, icon:'📐', label:'Räknaren',      next:280},
+  {min:280, icon:'✏️',  label:'Problemlösaren',next:500},
+  {min:500, icon:'∑',  label:'Algebristen',   next:780},
+  {min:780, icon:'🔣', label:'Analytikern',   next:1100},
+  {min:1100,icon:'🏅', label:'Matematikern',  next:1500},
+  {min:1500,icon:'🧮', label:'Mästaren',      next:9999},
+];
+function getRank(xp){return[...RANKS].reverse().find(r=>xp>=r.min)||RANKS[0];}
+
+// ── MOMENTS ──────────────────────────────────────────────────
+const MOMENTS=[
+// ──────────────────────────────────────────────────────────
+// M1: PQ-FORMELN
+// ──────────────────────────────────────────────────────────
+{id:1,title:"PQ-formeln",subtitle:"Lösa andragradsekvationer med PQ",icon:"📏",color:"#1A6B3A",
+ mathematician:{name:"Muhammad ibn Musa al-Khwarizmi",years:"ca 780–850 e.Kr.",portrait:"📜",
+  text:"Muhammad ibn Musa al-Khwarizmi var en persisk matematiker och vetenskapsman vid Bagdads Visdomens hus under det abbasidiska kalifatets guldålder. Hans verk Al-Kitab al-mukhtasar fi hisab al-jabr wal-muqabala — 'Den kortfattade boken om beräkning genom fullbordning och balansering' — lade grunden för algebran som disciplin. Det arabiska ordet al-jabr (fullbordning) gav oss det engelska ordet algebra. al-Khwarizmi systematiserade metoder för att lösa andragradsekvationer mer än 1 200 år före moderna läroböcker. Hans namn latiniserades till Algoritmi — och gav oss ordet algoritm.",
+  quote:"Vad som är lättast att förstå är det som är enklast uttryckt."},
+ concepts:[
+  {title:"Standardformen",body:"Alla andragradsekvationer kan skrivas i standardform. Koefficienten framför x² kallas a, framför x kallas b, och konstanten kallas c. När a = 1 kan vi dela med a och få formen x² + px + q = 0 — det är den form PQ-formeln arbetar med direkt.",
+   formula:"x² + px + q = 0",formulaExplain:"p = koefficienten framför x  ·  q = konstanttermen  ·  Jämför med ax² + bx + c = 0: p = b/a, q = c/a"},
+  {title:"PQ-formeln",body:"PQ-formeln ger lösningarna direkt från p och q. Ta minus p dividerat med 2, lägg till och dra av kvadratroten ur (p/2)² minus q. Om uttrycket under roten är negativt finns inga reella lösningar. Om det är noll finns exakt en lösning.",
+   formula:"x = −p/2 ± √( (p/2)² − q )",formulaExplain:"± betyder att du beräknar både + och − för att få x₁ och x₂  ·  Diskriminanten: D = (p/2)² − q"},
+  {title:"Tre fall",body:"Beroende på diskriminantens värde (D = (p/2)² − q) finns tre fall: D > 0 ger två olika reella lösningar, D = 0 ger exakt en lösning (dubbelrot), D < 0 ger inga reella lösningar.",
+   formula:"D > 0 → 2 lösningar  |  D = 0 → 1 lösning  |  D < 0 → inga",formulaExplain:"D kallas diskriminanten — den 'diskriminerar' mellan fallen"},
+ ],
+ practice:[
+  {id:"pq1",q:"Lös ekvationen x² − 5x + 6 = 0 med PQ-formeln.",eq:"x² − 5x + 6 = 0",
+   opts:["A) x = 1 eller x = 6","B) x = 2 eller x = 3","C) x = −2 eller x = −3","D) x = −1 eller x = 6"],
+   correct:"B",praise:"Utmärkt! p = −5, q = 6. x = 5/2 ± √(6,25 − 6) = 2,5 ± 0,5 → x = 3 eller x = 2.",
+   explain:"p = −5, q = 6. PQ: x = −(−5)/2 ± √((−5/2)² − 6) = 2,5 ± √(6,25−6) = 2,5 ± 0,5. x₁=3, x₂=2.",
+   socratic:"Vad är p och q i ekvationen x² − 5x + 6 = 0? Hur sätter du in dem i formeln x = −p/2 ± √((p/2)²−q)?"},
+  {id:"pq2",q:"Lös ekvationen x² + 4x + 3 = 0 med PQ-formeln.",eq:"x² + 4x + 3 = 0",
+   opts:["A) x = 1 eller x = 3","B) x = −1 eller x = 3","C) x = −1 eller x = −3","D) x = 2 eller x = −2"],
+   correct:"C",praise:"Rätt! p = 4, q = 3. x = −2 ± √(4−3) = −2 ± 1 → x = −1 eller x = −3.",
+   explain:"p=4, q=3. x = −4/2 ± √((4/2)²−3) = −2 ± √(4−3) = −2 ± 1. x₁=−1, x₂=−3.",
+   socratic:"Skriv av p och q. Vad är (p/2)²? Vad är (p/2)² − q? Vad är kvadratroten ur det?"},
+  {id:"pq3",q:"Ekvationen x² − 6x + 9 = 0. Hur många lösningar finns det?",eq:"x² − 6x + 9 = 0",
+   opts:["A) Inga lösningar","B) Exakt en lösning (dubbelrot)","C) Två olika lösningar","D) Oändligt många"],
+   correct:"B",praise:"Korrekt! D = (6/2)² − 9 = 9 − 9 = 0 → dubbelrot x = 3.",
+   explain:"p=−6, q=9. D = (p/2)²−q = (−3)²−9 = 9−9 = 0. D=0 → dubbelrot: x = −p/2 = 3.",
+   socratic:"Beräkna diskriminanten D = (p/2)² − q för den här ekvationen. Vad händer när D = 0?"},
+  {id:"pq4",q:"Lös x² − 2x − 8 = 0 med PQ-formeln.",eq:"x² − 2x − 8 = 0",
+   opts:["A) x = 4 eller x = −2","B) x = −4 eller x = 2","C) x = 2 eller x = −4","D) x = 4 eller x = 2"],
+   correct:"A",praise:"Perfekt! p = −2, q = −8. x = 1 ± √(1+8) = 1 ± 3. x₁ = 4, x₂ = −2.",
+   explain:"p=−2, q=−8. x = −(−2)/2 ± √((−1)²−(−8)) = 1 ± √9 = 1 ± 3. x₁=4, x₂=−2.",
+   socratic:"Var noga med tecknet på q. q = −8 är negativ — vad händer med (p/2)² − q när du subtraherar ett negativt tal?"},
+ ],
+ quiz:[
+  {id:"pqq1",q:"I ekvationen x² − 7x + 10 = 0, vad är p och q?",opts:["A) p=7, q=10","B) p=−7, q=10","C) p=7, q=−10","D) p=−10, q=7"],correct:"B",explain:"Jämför med x²+px+q=0: p=−7, q=10. Koefficienterna tas direkt med sina tecken."},
+  {id:"pqq2",q:"Lös x² − 5x + 6 = 0.",opts:["A) x=2 el. x=3","B) x=−2 el. x=−3","C) x=1 el. x=6","D) x=−1 el. x=−6"],correct:"A",explain:"p=−5,q=6. x=5/2±√(6,25−6)=2,5±0,5. x=3 el. x=2."},
+  {id:"pqq3",q:"Diskriminanten D = (p/2)² − q = 0. Det innebär:",opts:["A) Inga lösningar","B) Exakt en lösning","C) Två lösningar","D) Ekvationen är omöjlig"],correct:"B",explain:"D=0 → ±√0=0 → bara ett värde: x=−p/2. Dubbelrot."},
+  {id:"pqq4",q:"x² + 2x − 15 = 0. Lös med PQ.",opts:["A) x=3 el. x=−5","B) x=−3 el. x=5","C) x=5 el. x=3","D) x=−5 el. x=−3"],correct:"A",explain:"p=2,q=−15. x=−1±√(1+15)=−1±4. x₁=3, x₂=−5."},
+  {id:"pqq5",q:"Om D < 0 för en andragradsekvation med reella koefficienter:",opts:["A) x=0","B) Det finns inga reella lösningar","C) Det finns exakt en lösning","D) Formeln fungerar inte"],correct:"B",explain:"D<0 → roten ur ett negativt tal → inga reella lösningar. (Komplexa lösningar behandlas ej i Gy.)"},
+ ],
+ test:[
+  {id:"pqt1",q:"Lös x² + 6x + 5 = 0.",opts:["A) x=−1 el. x=−5","B) x=1 el. x=5","C) x=−2 el. x=−3","D) x=2 el. x=3"],correct:"A",explain:"p=6,q=5. x=−3±√(9−5)=−3±2. x=−1 el. x=−5."},
+  {id:"pqt2",q:"Lös x² − 4x + 4 = 0.",opts:["A) x=4 el. x=0","B) x=2 (dubbelrot)","C) x=−2 (dubbelrot)","D) x=1 el. x=3"],correct:"B",explain:"p=−4,q=4. D=(−2)²−4=0 → x=2. Dubbelrot."},
+  {id:"pqt3",q:"Ekvationen x² + x + 1 = 0 har:",opts:["A) x=0 el. x=−1","B) Exakt en lösning x=−½","C) Inga reella lösningar","D) x=1 el. x=−1"],correct:"C",explain:"p=1,q=1. D=(½)²−1=0,25−1=−0,75<0. Inga reella lösningar."},
+  {id:"pqt4",q:"Lös x² − 3x − 10 = 0.",opts:["A) x=5 el. x=−2","B) x=−5 el. x=2","C) x=10 el. x=−1","D) x=2 el. x=5"],correct:"A",explain:"p=−3,q=−10. x=3/2±√(9/4+10)=1,5±√13,25=1,5±3,5. x=5 el. x=−2."},
+  {id:"pqt5",q:"Vad är första steget när du ser ax²+bx+c=0 och vill använda PQ-formeln?",opts:["A) Sätt in direkt i formeln","B) Dela hela ekvationen med a för att få x²+px+q=0","C) Flytta c till höger","D) Kvadratkomplettera"],correct:"B",explain:"PQ-formeln kräver att koefficienten för x² är 1. Dela alltid med a om a≠1."},
+ ]
+},
+// ──────────────────────────────────────────────────────────
+// M2: TEST-LÖSNINGSFORMELN (VIÈTE)
+// ──────────────────────────────────────────────────────────
+{id:2,title:"Test-Lösningsformeln",subtitle:"Viètesambanden — Summa och produkt av rötter",icon:"🔍",color:"#1A4B8C",
+ mathematician:{name:"François Viète",years:"1540–1603",portrait:"📊",
+  text:"François Viète var en fransk advokat och amatörmatematiker som revolutionerade algebran i slutet av 1500-talet. Han var den förste att systematiskt använda bokstäver som symboler i algebra — inte bara för okända utan även för kända storheter. Viète knäckte dessutom hemliga chifrerade meddelanden för den franske kungen Henrik IV, vilket fick spanska beskickningar att klaga till påven och hävda att Frankrike använde svart magi. Hans matematiska arv: de fundamentala samband som bär hans namn — Viètesambanden — som kopplar en polynomekvations rötter till dess koefficienter.",
+  quote:"Det finns ingen ekvation som inte kan lösas."},
+ concepts:[
+  {title:"Viètesambanden",body:"För ekvationen x² + px + q = 0 med rötterna x₁ och x₂ gäller alltid: summan av rötterna är −p och produkten av rötterna är q. Det är Viètesambanden. Om du kan gissa två tal vars summa är −p och vars produkt är q — så är det dina rötter.",
+   formula:"x₁ + x₂ = −p   och   x₁ · x₂ = q",formulaExplain:"Gäller alltid när ekvationen är på formen x² + px + q = 0"},
+  {title:"Metoden steg för steg",body:"1) Läs av p och q ur ekvationen. 2) Skriv upp: summan = −p, produkt = q. 3) Testa heltalskombinationer: vilka två tal ger den summan OCH den produkten? 4) De talen är dina rötter. Metoden fungerar snabbast när rötterna är heltal.",
+   formula:"Sök x₁, x₂ så att: x₁+x₂ = −p  ∧  x₁·x₂ = q",formulaExplain:"Testa faktorer till q och kontrollera summan — eller testa faktorer till −p och kontrollera produkten"},
+  {title:"Varför fungerar det?",body:"Multiplicera ut (x − x₁)(x − x₂): du får x² − (x₁+x₂)x + x₁x₂. Jämför med x²+px+q: p = −(x₁+x₂) och q = x₁x₂. Alltså: summan av rötterna = −p och produkten = q. Viète bevisade detta för alla polynomgrader.",
+   formula:"(x−x₁)(x−x₂) = x² − (x₁+x₂)x + x₁x₂",formulaExplain:"Expandera för att förstå varifrån sambanden kommer"},
+ ],
+ practice:[
+  {id:"tl1",q:"Använd test-lösningsformeln på x² − 7x + 12 = 0. Summa = ?, Produkt = ?",eq:"x² − 7x + 12 = 0",
+   opts:["A) x = 3 eller x = 4","B) x = 6 eller x = 2","C) x = −3 eller x = −4","D) x = 12 eller x = 1"],
+   correct:"A",praise:"Rätt! Summa = 7, produkt = 12. 3+4=7 och 3·4=12 ✓",
+   explain:"p=−7,q=12. Summa=−(−7)=7. Produkt=12. Vilka två tal? 3 och 4 (3+4=7, 3·4=12).",
+   socratic:"p=−7 → summan av rötterna ska vara −p=7. q=12 → produkten ska vara 12. Vilka heltal summerar till 7 och multiplicerar till 12?"},
+  {id:"tl2",q:"Lös x² + x − 6 = 0 med test-lösningsformeln.",eq:"x² + x − 6 = 0",
+   opts:["A) x = 2 eller x = −3","B) x = 3 eller x = −2","C) x = 6 eller x = −1","D) x = −6 eller x = 1"],
+   correct:"A",praise:"Korrekt! Summa=−1, produkt=−6. 2+(−3)=−1 ✓ och 2·(−3)=−6 ✓",
+   explain:"p=1,q=−6. Summa=−p=−1. Produkt=q=−6. 2 och −3: 2+(−3)=−1 ✓, 2·(−3)=−6 ✓.",
+   socratic:"q=−6 är negativt — det betyder att rötterna har OLIKA tecken. Vilka par av heltal med olika tecken ger produkten −6? Testa och kolla vilken som ger rätt summa."},
+  {id:"tl3",q:"Lös x² − 9x + 20 = 0.",eq:"x² − 9x + 20 = 0",
+   opts:["A) x = 4 eller x = 5","B) x = −4 eller x = −5","C) x = 2 eller x = 10","D) x = 1 eller x = 20"],
+   correct:"A",praise:"Perfekt! Summa=9, produkt=20. 4·5=20 och 4+5=9 ✓",
+   explain:"p=−9,q=20. Summa=9, produkt=20. Faktorpar av 20: (1,20),(2,10),(4,5). Bara 4+5=9.",
+   socratic:"Lista alla faktorpar av 20 (heltal, positiva). Vilken summa behöver du? Vilket par passar?"},
+  {id:"tl4",q:"x² + 5x + 6 = 0. Välj rätt metod-resonemang.",eq:"x² + 5x + 6 = 0",
+   opts:["A) Summa=−5, produkt=6 → x=−2 el. x=−3","B) Summa=5, produkt=6 → x=2 el. x=3","C) Summa=−5, produkt=−6 → ingen lösning","D) Produkten är 6 → x=6"],
+   correct:"A",praise:"Utmärkt resonemang! p=5 → summa=−5, q=6 → produkt=6. Talet −2 och −3 stämmer.",
+   explain:"p=5 → summa=−p=−5. q=6 → produkt=6. −2+(−3)=−5 ✓, (−2)·(−3)=+6 ✓. x=−2 el. x=−3.",
+   socratic:"p är positiv. Vad är −p? Båda rötterna negativa eller positiva när summan är negativ och produkten positiv?"},
+ ],
+ quiz:[
+  {id:"tlq1",q:"x₁+x₂ och x₁·x₂ i x²+px+q=0 är:",opts:["A) p och q","B) −p och q","C) p och −q","D) −p och −q"],correct:"B",explain:"Viète: summa=−p, produkt=q. Direkt ur (x−x₁)(x−x₂)=x²−(summa)x+produkt."},
+  {id:"tlq2",q:"x²−8x+15=0. Rötterna är:",opts:["A) x=3 el. x=5","B) x=−3 el. x=−5","C) x=1 el. x=15","D) x=4 el. x=4"],correct:"A",explain:"Summa=8, produkt=15. 3+5=8, 3·5=15 ✓."},
+  {id:"tlq3",q:"q=−12 i x²+px+q=0 innebär att rötterna:",opts:["A) Båda är negativa","B) Båda är positiva","C) Har olika tecken","D) Är lika stora"],correct:"C",explain:"Produkt=q=−12<0 → de har olika tecken (+ · − = −)."},
+  {id:"tlq4",q:"x²+3x−10=0. Rötterna är:",opts:["A) x=2 el. x=−5","B) x=−2 el. x=5","C) x=10 el. x=−1","D) x=2 el. x=5"],correct:"A",explain:"Summa=−3, produkt=−10. 2+(−5)=−3 ✓, 2·(−5)=−10 ✓."},
+  {id:"tlq5",q:"Vilket är INTE en rot till x²−5x+6=0?",opts:["A) x=2","B) x=3","C) x=1","D) Alla tre är rötter"],correct:"C",explain:"x=1: 1−5+6=2≠0. x=2: 4−10+6=0 ✓. x=3: 9−15+6=0 ✓. Bara två rötter."},
+ ],
+ test:[
+  {id:"tlt1",q:"x²−11x+28=0 med Viète:",opts:["A) x=4 el. x=7","B) x=−4 el. x=−7","C) x=2 el. x=14","D) x=1 el. x=28"],correct:"A",explain:"Summa=11, produkt=28. 4+7=11, 4·7=28 ✓."},
+  {id:"tlt2",q:"x²+2x−24=0:",opts:["A) x=4 el. x=−6","B) x=−4 el. x=6","C) x=6 el. x=4","D) x=−2 el. x=12"],correct:"A",explain:"Summa=−2,produkt=−24. 4+(−6)=−2 ✓, 4·(−6)=−24 ✓."},
+  {id:"tlt3",q:"x₁=3, x₂=−7. Vilken ekvation på formen x²+px+q=0 har dessa rötter?",opts:["A) x²+4x−21=0","B) x²−4x−21=0","C) x²+4x+21=0","D) x²−4x+21=0"],correct:"B",explain:"Summa=3+(−7)=−4=−p→p=4. Produkt=3·(−7)=−21=q. Ekvation: x²+4x−21=0. Men vänta: −p=−4→p=4 → x²+4x−21=0. Kontrollera: summa=−4≠−4... OBS: (x−3)(x+7)=x²+7x−3x−21=x²+4x−21. Rätt svar B."},
+  {id:"tlt4",q:"Varför fungerar test-lösningsformeln snabbast för heltalslösningar?",opts:["A) Formeln är bara definierad för heltal","B) Faktorpar till q är lätta att lista för heltal","C) PQ-formeln ger alltid fel för heltal","D) Man slipper ta kvadratroten"],correct:"B",explain:"Heltal → ändligt antal faktorpar → snabb genomsökning. Bråkrötter kräver annan metod."},
+  {id:"tlt5",q:"x²−2x−35=0:",opts:["A) x=7 el. x=−5","B) x=−7 el. x=5","C) x=5 el. x=7","D) x=35 el. x=−1"],correct:"A",explain:"Summa=2,produkt=−35. 7+(−5)=2 ✓, 7·(−5)=−35 ✓."},
+ ]
+},
+// ──────────────────────────────────────────────────────────
+// M3: KVADRATROTS-METODEN
+// ──────────────────────────────────────────────────────────
+{id:3,title:"Kvadratrots-metoden",subtitle:"Lösa genom att ta kvadratroten på båda sidor",icon:"√",color:"#92600A",
+ mathematician:{name:"Euklides av Alexandria",years:"ca 325–265 f.Kr.",portrait:"📐",
+  text:"Euklides var en grekisk matematiker som levde och verkade i Alexandria i Egypten under Ptolemaios I:s styre. Hans verk Elementen är ett av historiens mest inflytelserika matematiska verk — det användes som standardlärobok i matematik i över 2 000 år. Elementen bevisar geometriska satser och behandlar bland annat kvadrattal och kvadratrötter med geometrisk precision. Euklides geometriska syn på algebra lade grunden för hur vi förstår kvadratkomplettering och kvadratlösning: att 'lösa x² = a' är detsamma som att hitta sidan i en kvadrat med arean a.",
+  quote:"Det finns ingen kunglig väg till geometrin."},
+ concepts:[
+  {title:"Principen",body:"Kvadratrots-metoden fungerar direkt när du har formen x² = a eller (x+k)² = a — det vill säga ett perfekt kvadratuttryck på ena sidan och ett tal på andra. Du tar kvadratroten på båda sidor och minns att det ger BÅDE positiv och negativ rot.",
+   formula:"x² = a  →  x = ±√a",formulaExplain:"OBS: ± är avgörande — glöm aldrig den negativa lösningen. Om a < 0 finns inga reella lösningar."},
+  {title:"Formen (x+k)² = a",body:"Om parentesen är upphöjd till 2 på ena sidan fungerar samma princip: ta kvadratroten på båda sidor. Du får x+k = ±√a, och löser sedan ut x. Många ekvationer måste arrangeras om till den här formen genom att flytta termer.",
+   formula:"(x+k)² = a  →  x+k = ±√a  →  x = −k ± √a",formulaExplain:"k = det tal som är inuti parentesen  ·  a = talet på höger sida"},
+  {title:"Kvadratkomplettering",body:"Ibland behöver du skapa formen (x+k)². Ta ekvationen x²+bx+c=0. Flytta c till höger. Lägg till (b/2)² på båda sidor — nu är vänster sida (x+b/2)². Lös sedan med kvadratrots-metoden. Kvadratkomplettering är faktiskt hur PQ-formeln härleds!",
+   formula:"x²+bx = −c  →  (x+b/2)² = (b/2)²−c",formulaExplain:"Lägg till (b/2)² på båda sidor för att bilda en perfekt kvadrat till vänster"},
+ ],
+ practice:[
+  {id:"kv1",q:"Lös ekvationen x² = 49.",eq:"x² = 49",
+   opts:["A) x = 7","B) x = −7","C) x = 7 eller x = −7","D) x = 24,5"],
+   correct:"C",praise:"Rätt! x = ±√49 = ±7. Glöm aldrig den negativa lösningen!",
+   explain:"x²=49 → x=±√49=±7. Båda: 7²=49 ✓ och (−7)²=49 ✓.",
+   socratic:"√49 = 7, men vad är (−7)²? Finns det fler lösningar än en positiv?"},
+  {id:"kv2",q:"Lös (x−3)² = 16.",eq:"(x−3)² = 16",
+   opts:["A) x = 7 eller x = −1","B) x = 19 eller x = −13","C) x = 7","D) x = 4 eller x = −4"],
+   correct:"A",praise:"Perfekt! x−3 = ±4 → x = 3+4=7 eller x = 3−4=−1.",
+   explain:"Ta √ på båda: x−3=±4. x=3+4=7 eller x=3−4=−1.",
+   socratic:"Efter att ta kvadratroten ur 16 får du x−3 = ±4. Nu har du två enkla linjära ekvationer. Lös båda."},
+  {id:"kv3",q:"Lös x² − 8x + 16 = 0 med kvadratrots-metoden.",eq:"x² − 8x + 16 = 0",
+   opts:["A) x = 4 (dubbelrot)","B) x = 4 eller x = −4","C) x = 8 eller x = 0","D) x = 2 eller x = 6"],
+   correct:"A",praise:"Utmärkt! (x−4)² = 0 → x−4 = 0 → x = 4. Dubbelrot.",
+   explain:"x²−8x+16 = (x−4)². Alltså (x−4)²=0 → x−4=±0=0 → x=4.",
+   socratic:"Kan du skriva x²−8x+16 som (x−?)²? Vad är (x−4)² multiplicerat ut?"},
+  {id:"kv4",q:"Lös 2x² − 18 = 0.",eq:"2x² − 18 = 0",
+   opts:["A) x = 3 eller x = −3","B) x = 9","C) x = 3","D) x = ±√9 = ±3 "],
+   correct:"A",praise:"Rätt! Dela med 2: x²=9. Ta √: x=±3. Svaren är x=3 och x=−3.",
+   explain:"2x²=18 → x²=9 → x=±√9=±3.",
+   socratic:"Isolera x² först — hur? Dela med ledande koefficienten. Sedan: vad är √9 och glöm inte ±."},
+ ],
+ quiz:[
+  {id:"kvq1",q:"x²=25. Lösningarna är:",opts:["A) x=5","B) x=−5","C) x=5 el. x=−5","D) x=12,5"],correct:"C",explain:"x=±√25=±5. Alltid ± när du tar kvadratroten."},
+  {id:"kvq2",q:"(x+2)²=9. Lösningarna är:",opts:["A) x=1 el. x=−5","B) x=7 el. x=−7","C) x=3 el. x=−3","D) x=11 el. x=7"],correct:"A",explain:"x+2=±3. x=−2+3=1 el. x=−2−3=−5."},
+  {id:"kvq3",q:"x²−12x+36 = 0. Skriv om som perfekt kvadrat:",opts:["A) (x−6)²=0","B) (x+6)²=0","C) (x−12)²=0","D) x²=36"],correct:"A",explain:"x²−12x+36=(x−6)². (x−6)²=0 → x=6."},
+  {id:"kvq4",q:"Varför ger x²=a alltid två lösningar (om a>0)?",opts:["A) Alla polynom har två rötter","B) Både √a och −√a kvadreras till a","C) Formeln kräver ±","D) Det finns alltid en positiv och en imaginär"],correct:"B",explain:"(√a)²=a ✓ och (−√a)²=a ✓. Båda ger a → båda är lösningar."},
+  {id:"kvq5",q:"3x²=75. Lösning:",opts:["A) x=5 el. x=−5","B) x=25","C) x=5","D) x=√25=5"],correct:"A",explain:"x²=75/3=25 → x=±5."},
+ ],
+ test:[
+  {id:"kvt1",q:"x²−36=0.",opts:["A) x=6 el. x=−6","B) x=18","C) x=6","D) x=36"],correct:"A",explain:"x²=36 → x=±6."},
+  {id:"kvt2",q:"(x+5)²=0.",opts:["A) x=5 el. x=−5","B) x=−5 (dubbelrot)","C) x=0","D) x=5"],correct:"B",explain:"x+5=0 → x=−5. Dubbelrot eftersom ±√0=0."},
+  {id:"kvt3",q:"4x²−100=0.",opts:["A) x=5 el. x=−5","B) x=25","C) x=10 el. x=−10","D) x=50"],correct:"A",explain:"4x²=100 → x²=25 → x=±5."},
+  {id:"kvt4",q:"(2x−1)²=9. Lösning:",opts:["A) x=2 el. x=−1","B) x=4 el. x=−1","C) x=2 el. x=1","D) x=5 el. x=−4"],correct:"A",explain:"2x−1=±3. 2x=1+3=4→x=2. 2x=1−3=−2→x=−1."},
+  {id:"kvt5",q:"Kvadratkomplettering av x²+6x+c=0: vilket c ger en perfekt kvadrat?",opts:["A) c=9","B) c=3","C) c=36","D) c=6"],correct:"A",explain:"(b/2)²=(6/2)²=9. x²+6x+9=(x+3)². c=9."},
+ ]
+},
+// ──────────────────────────────────────────────────────────
+// M4: NOLLPRODUKTMETODEN
+// ──────────────────────────────────────────────────────────
+{id:4,title:"Nollproduktmetoden",subtitle:"Faktorisering och nollproduktsregeln",icon:"✂️",color:"#6B3FA0",
+ mathematician:{name:"René Descartes",years:"1596–1650",portrait:"🧠",
+  text:"René Descartes var en fransk filosof, matematiker och naturvetare som skapade den analytiska geometrin — bryggan mellan algebra och geometri. Hans koordinatsystem (kartesius-koordinater) bär fortfarande hans latiniserade namn. I verket La Géométrie (1637) formulerade Descartes faktorsatsen som kopplar polynomens rötter till deras linjära faktorer. Det var Descartes som insåg att om ett polynom har roten r, kan man faktorisera ut (x−r) som en faktor. Nollproduktsregeln — att A·B=0 kräver A=0 eller B=0 — är en direkt konsekvens av hans algebraiska analys av polynomfaktorer.",
+  quote:"Jag tänker, alltså är jag."},
+ concepts:[
+  {title:"Nollproduktsregeln",body:"Om produkten av två faktorer är noll MÅSTE minst en av faktorerna vara noll. Det är ett fundamentalt axiom för reella tal. Regeln används för att lösa ekvationer som redan är faktoriserade — eller som kan faktoriseras.",
+   formula:"A · B = 0  ⟹  A = 0  eller  B = 0",formulaExplain:"Gäller för alla reella tal A och B. Fungerar inte om höger sida är ≠ 0."},
+  {title:"Faktorisering av andragradsuttryck",body:"En andragradsekvation kan ibland faktoriseras direkt som (x − r₁)(x − r₂) = 0. Faktorerna hittar du med test-lösningsmetoden: leta två tal r₁, r₂ sådana att r₁ + r₂ = −p och r₁ · r₂ = q. Sedan sätter du varje faktor = 0 och löser.",
+   formula:"x² + px + q = (x − r₁)(x − r₂)",formulaExplain:"r₁ och r₂ är de rötter du hittar via Viètesambanden  ·  Fungerar bäst med heltalsrötter"},
+  {title:"Metoden steg för steg",body:"1) Se till att ena sidan är 0. 2) Faktorisera vänster sida. 3) Sätt varje faktor = 0. 4) Lös de linjära ekvationerna. OBS: Höger sida MÅSTE vara 0 för att nollproduktregeln ska fungera. x(x+3) = 5 kan du INTE lösa som x=5 och x+3=5.",
+   formula:"(x−r₁)(x−r₂)=0 → x=r₁ eller x=r₂",formulaExplain:"Sätt alltid om till =0 innan du faktoriserar"},
+ ],
+ practice:[
+  {id:"np1",q:"Lös (x−3)(x+5) = 0.",eq:"(x−3)(x+5) = 0",
+   opts:["A) x = 3 eller x = −5","B) x = −3 eller x = 5","C) x = 3 och x = 5","D) x = 15"],
+   correct:"A",praise:"Rätt! Nollprodukt: x−3=0→x=3, x+5=0→x=−5.",
+   explain:"Nollprodukt: x−3=0→x=3 ELLER x+5=0→x=−5.",
+   socratic:"Nollproduktregeln: om A·B=0, måste A=0 eller B=0. Vad är A och B här? Sätt dem var för sig = 0."},
+  {id:"np2",q:"Lös x² − x − 6 = 0 med nollproduktmetoden.",eq:"x² − x − 6 = 0",
+   opts:["A) x = 3 eller x = −2","B) x = −3 eller x = 2","C) x = 6 eller x = −1","D) x = 2 eller x = 3"],
+   correct:"A",praise:"Korrekt! (x−3)(x+2)=0 → x=3 eller x=−2.",
+   explain:"Faktorisera: söker r₁,r₂ med summa=1, produkt=−6. 3+(−2)=1 ✓, 3·(−2)=−6 ✓. (x−3)(x+2)=0 → x=3 el. x=−2.",
+   socratic:"Vilka två tal summerar till 1 och multiplicerar till −6? Skriv dem som faktorer (x−r₁)(x−r₂) och sätt =0."},
+  {id:"np3",q:"En elev skriver: x(x+4) = 12 → x=12 eller x+4=12. Vad är felet?",eq:"x(x+4) = 12",
+   opts:["A) Eleven har glömt ±","B) Nollproduktregeln kräver att höger sida är 0, inte 12","C) x(x+4) kan inte faktoriseras","D) Det finns inget fel"],
+   correct:"B",praise:"Utmärkt förståelse! Höger sida måste vara 0. Skriv om: x²+4x−12=0 och faktorisera.",
+   explain:"Nollproduktregeln: A·B=0 kräver H.S=0. 12≠0 → kan inte splitta direkt. Skriv om: x²+4x−12=0.",
+   socratic:"Vad säger nollproduktregeln om vad höger sida måste vara? Vad behöver du göra med ekvationen x(x+4)=12 innan du kan använda den?"},
+  {id:"np4",q:"Lös x² + 8x + 15 = 0 med nollproduktmetoden.",eq:"x² + 8x + 15 = 0",
+   opts:["A) x = −3 eller x = −5","B) x = 3 eller x = 5","C) x = −3 eller x = 5","D) x = 15 eller x = 1"],
+   correct:"A",praise:"Rätt! (x+3)(x+5)=0 → x=−3 el. x=−5.",
+   explain:"Summa=−8, produkt=15. −3+(−5)=−8 ✓, (−3)·(−5)=15 ✓. (x+3)(x+5)=0 → x=−3 el. x=−5.",
+   socratic:"Summa=−8, produkt=15. Båda negativa — varför? Lista par av negativt heltal som multipliceras till 15."},
+ ],
+ quiz:[
+  {id:"npq1",q:"A·B=0 innebär alltid att:",opts:["A) A=0 och B=0","B) A=0 eller B=0","C) A=B","D) AB=1"],correct:"B",explain:"Nollproduktregeln: MINST en faktor = 0. Båda kan vara noll, men det krävs inte."},
+  {id:"npq2",q:"(x+7)(x−2)=0. Rötterna:",opts:["A) x=7 el. x=−2","B) x=−7 el. x=2","C) x=7 el. x=2","D) x=−7 el. x=−2"],correct:"B",explain:"x+7=0→x=−7. x−2=0→x=2."},
+  {id:"npq3",q:"x²+2x−8=0. Faktoriserad form:",opts:["A) (x+4)(x−2)=0","B) (x−4)(x+2)=0","C) (x+8)(x−1)=0","D) (x−8)(x+1)=0"],correct:"A",explain:"Summa=−2, produkt=−8. 4+(−2)=2... nej, vänta: x²+2x−8. p=2→summa=−p=−2, q=−8. Faktorer: −2 och 4: −2+4=2... hmm, nej. (x+4)(x−2)=x²+2x−8 ✓ (expand: x·x−2x+4x−8=x²+2x−8)."},
+  {id:"npq4",q:"Varför kan du INTE lösa x(x−1)=6 som x=6 eller x−1=6?",opts:["A) x är en okänd","B) Nollproduktregeln kräver H.S=0, inte 6","C) Ekvationen har inga lösningar","D) Höger sida ska vara negativ"],correct:"B",explain:"Nollprodukt fungerar BARA när H.S=0. Skriv om: x²−x−6=0 och faktorisera."},
+  {id:"npq5",q:"(3x−6)(x+4)=0. Rötterna:",opts:["A) x=2 el. x=−4","B) x=6 el. x=−4","C) x=−2 el. x=4","D) x=3 el. x=−4"],correct:"A",explain:"3x−6=0→x=2. x+4=0→x=−4."},
+ ],
+ test:[
+  {id:"npt1",q:"(x−8)(x+3)=0:",opts:["A) x=8 el. x=−3","B) x=−8 el. x=3","C) x=8 el. x=3","D) x=24"],correct:"A",explain:"x−8=0→x=8. x+3=0→x=−3."},
+  {id:"npt2",q:"x²−16=0 med nollproduktmetoden:",opts:["A) (x−4)(x+4)=0 → x=±4","B) x²=16 → x=4","C) (x−16)(x+1)=0","D) Kan inte faktoriseras"],correct:"A",explain:"Skillnad av kvadrater: x²−16=(x−4)(x+4)=0 → x=4 el. x=−4."},
+  {id:"npt3",q:"x²−7x=0 med nollproduktmetoden:",opts:["A) x=0 el. x=7","B) x=7","C) x=0 el. x=−7","D) x=±7"],correct:"A",explain:"x(x−7)=0 → x=0 el. x−7=0→x=7."},
+  {id:"npt4",q:"2x²+2x−12=0. Första steget för nollproduktmetoden:",opts:["A) Dela med 2: x²+x−6=0","B) Flytta 12: 2x²+2x=12","C) Ta √ på båda sidor","D) Använd PQ direkt"],correct:"A",explain:"Dela med 2 för att få 1 som ledande koefficient: x²+x−6=0 → (x+3)(x−2)=0."},
+  {id:"npt5",q:"x³−4x=0 (notera: grad 3). Hur löser du med nollprodukt?",opts:["A) x(x²−4)=0 → x(x−2)(x+2)=0 → x=0,2,−2","B) x=4","C) Ta ∛ på båda sidor","D) Polynom av grad 3 kan inte faktoriseras"],correct:"A",explain:"x(x²−4)=0, och x²−4=(x−2)(x+2). Nollprodukt ger x=0, x=2, x=−2. Tre rötter!"},
+ ]
+},
+// ──────────────────────────────────────────────────────────
+// M5: BLANDAT — ALLA FYRA METODER
+// ──────────────────────────────────────────────────────────
+{id:5,title:"Blandat — Välj rätt metod",subtitle:"Alla fyra metoder kombinerat",icon:"🎯",color:"#C0392B",
+ mathematician:{name:"Bhaskara II",years:"1114–1185",portrait:"🌏",
+  text:"Bhaskara II, känd som Bhaskaracharya ('Bhaskara läraren'), var en indisk matematiker och astronom från Bijapur. Hans verk Bijaganita ('Frö-räkning') är en av de mest fullständiga behandlingarna av algebra från medeltida Indien. Bhaskara formulerade lösningsmetoder för andragradsekvationer, kub-ekvationer och hade djup förståelse för nollans och negativa tals algebra. Han visade att man kan lösa samma ekvation på många sätt och att alla metoder leder till samma svar — om man utför dem korrekt. Det är precis vad du nu tränar: att välja den smartaste metoden för varje ekvationstyp.",
+  quote:"Den kunskapen som inte tillämpas är som ett frö som aldrig planterats."},
+ concepts:[
+  {title:"Fyra metoder — fyra situationer",body:"Nu är det dags att avgöra vilken metod som passar bäst. Tumregler: Kvadratsrots-metoden → x² = a eller (x+k)² = a. Nollproduktmetoden → redan faktoriserat eller uppenbar faktorisering. Test-lösningsformeln → x² + px + q = 0 med heltalslösningar. PQ-formeln → x² + px + q = 0 alltid — speciellt när rötterna inte är heltal.",
+   formula:"Se formen → Välj metod → Lös",formulaExplain:"Rätt metod sparar tid. Fel metod ger rätt svar men kräver mer arbete."},
+  {title:"Snabbtest: vilken metod?",body:"1) Är det (x+k)² = a? → Kvadratrot. 2) Är det faktoriserat, ex. (x−a)(x−b)=0? → Nollprodukt. 3) Finns tydliga heltalsfaktorer? → Test-lösning. 4) Övrigt / säkert alternativ? → PQ.",
+   formula:"Form avgör metod — inte slumpen",formulaExplain:"Alla fyra metoder löser samma typ av ekvation — metodvalet handlar om effektivitet"},
+  {title:"Kontrollera alltid svaret",body:"Sätt in dina rötter i originalutrycket och kontrollera. Om x=3 är en rot i x²−5x+6=0 ska 3²−5·3+6=9−15+6=0 ✓. Kontroll tar tio sekunder och eliminerar räknefel. En äkta matematiker kontrollerar alltid.",
+   formula:"Kontroll: sätt in x-värdet i originaluttrycket",formulaExplain:"Om svaret inte satisfierar ekvationen är det fel — börja om med rätt metod"},
+ ],
+ practice:[
+  {id:"bm1",q:"x² = 64. Vilken metod är snabbast? Lös.",eq:"x² = 64",
+   opts:["A) PQ: x = 0 ± √64 → x=±8","B) Kvadratrot direkt: x = ±8","C) Nollprodukt: x(x−64)=0","D) Test-lösning: inga heltalsfaktorer"],
+   correct:"B",praise:"Perfekt metodval! x²=a → ta kvadratroten direkt. x=±8.",
+   explain:"Formen x²=a → kvadratrots-metoden är snabbast. x=±√64=±8.",
+   socratic:"Vilket mönster ser du? Är ena sidan ett perfekt kvadratuttryck och andra sidan ett tal?"},
+  {id:"bm2",q:"(x−2)(x+7) = 0. Vilken metod? Lös.",eq:"(x−2)(x+7) = 0",
+   opts:["A) PQ-formeln","B) Nollproduktmetoden: x=2 el. x=−7","C) Kvadratrot","D) Test-lösning"],
+   correct:"B",praise:"Rätt! Redan faktoriserat → nollprodukt direkt. x=2 el. x=−7.",
+   explain:"Redan faktoriserat → nollprodukt. x−2=0→x=2 el. x+7=0→x=−7.",
+   socratic:"Behöver du göra något med den här ekvationen innan du kan använda nollproduktregeln?"},
+  {id:"bm3",q:"x² − 3x − 18 = 0. Välj smart metod.",eq:"x² − 3x − 18 = 0",
+   opts:["A) Kvadratrot — ta √ direkt","B) Test-lösning: summa=3, produkt=−18 → x=6 el. x=−3","C) PQ med decimaler","D) Nollprodukt utan faktorisering"],
+   correct:"B",praise:"Smart val! Heltal finns. Summa=3, produkt=−18 → 6+(−3)=3 ✓, 6·(−3)=−18 ✓.",
+   explain:"Summa=3, produkt=−18. Prova: 6 och −3: summa=3 ✓, produkt=−18 ✓. x=6 el. x=−3.",
+   socratic:"Prova att hitta heltalsfaktorer till −18 vars summa är 3. Om du hittar dem är test-lösning snabbast."},
+  {id:"bm4",q:"x² + 3x + 1 = 0. Vilken metod passar och vad är svaret?",eq:"x² + 3x + 1 = 0",
+   opts:["A) Test-lösning: x=1 el. x=−1","B) PQ: x = −3/2 ± √(9/4−1) = −3/2 ± √(5/4)","C) Kvadratrot direkt","D) Nollprodukt: (x+1)(x+1)=0"],
+   correct:"B",praise:"Rätt metodval! Inga heltalslösningar → PQ är rätt. x = −1,5 ± √1,25 ≈ −0,38 el. −2,62.",
+   explain:"p=3,q=1. D=(3/2)²−1=9/4−1=5/4>0 → 2 lösningar. x=−3/2±√(5/4). Inga heltalsrötter finns.",
+   socratic:"Försök hitta heltal r₁,r₂ med summa=−3 och produkt=1. Finns det? Vad gör du när test-lösning misslyckas?"},
+ ],
+ quiz:[
+  {id:"bmq1",q:"x²=100. Smartaste metoden:",opts:["A) PQ-formeln","B) Kvadratrot: x=±10","C) Faktorisering","D) Test-lösning"],correct:"B",explain:"x²=a → kvadratrot direkt. x=±10."},
+  {id:"bmq2",q:"(x+6)(x−1)=0. Smartaste metoden:",opts:["A) Multiplicera ut och PQ","B) Nollproduktregeln: x=−6 el. x=1","C) Kvadratrot","D) Test-lösning"],correct:"B",explain:"Redan faktoriserat → nollprodukt direkt. Multiplicera aldrig ut i onödan."},
+  {id:"bmq3",q:"x²−x−20=0. Test-lösning: rötterna är:",opts:["A) x=5 el. x=−4","B) x=−5 el. x=4","C) x=10 el. x=−2","D) x=4 el. x=5"],correct:"A",explain:"Summa=1,produkt=−20. 5+(−4)=1 ✓, 5·(−4)=−20 ✓."},
+  {id:"bmq4",q:"x²+2x+2=0. Diskriminanten D=:",opts:["A) D=0 → dubbelrot","B) D=−1 → inga reella lösningar","C) D=3 → två lösningar","D) D=1 → x=0 el. x=−2"],correct:"B",explain:"p=2,q=2. D=(p/2)²−q=1−2=−1<0. Inga reella lösningar."},
+  {id:"bmq5",q:"Vilken metod passar ALLTID för x²+px+q=0?",opts:["A) Test-lösning","B) Kvadratrot","C) PQ-formeln","D) Nollprodukt"],correct:"C",explain:"PQ-formeln fungerar alltid — oavsett om rötterna är heltal, bråk eller irrationella."},
+ ],
+ test:[
+  {id:"bmt1",q:"Lös x²−49=0. Bästa metod + svar:",opts:["A) Kvadratrot: x=±7","B) PQ: x=0±7","C) Nollprodukt: ej möjlig","D) Test-lösning: x=7 el. x=49"],correct:"A",explain:"x²=49 → x=±7. Kvadratrot direkt."},
+  {id:"bmt2",q:"x²+7x+12=0 med test-lösning:",opts:["A) x=−3 el. x=−4","B) x=3 el. x=4","C) x=12 el. x=1","D) x=−6 el. x=−2"],correct:"A",explain:"Summa=−7,produkt=12. −3+(−4)=−7 ✓, (−3)·(−4)=12 ✓."},
+  {id:"bmt3",q:"(x−5)(2x+3)=0:",opts:["A) x=5 el. x=−3/2","B) x=5 el. x=3/2","C) x=−5 el. x=3/2","D) x=10 el. x=3"],correct:"A",explain:"x−5=0→x=5. 2x+3=0→x=−3/2."},
+  {id:"bmt4",q:"x²+4x+2=0 med PQ:",opts:["A) x=−2±√2","B) x=2±√2","C) x=−2±√6","D) Inga reella lösningar"],correct:"A",explain:"p=4,q=2. x=−2±√(4−2)=−2±√2."},
+  {id:"bmt5",q:"Vilket är sant om alla fyra metoderna för andragradsekvationer?",opts:["A) De ger alltid olika svar","B) Rätt utförda ger de alltid samma svar","C) PQ ger en rot, nollprodukt ger en annan","D) Test-lösning är alltid snabbast"],correct:"B",explain:"Alla metoder löser samma ekvation. Rätt utförda → identiska svar. Metodvalet handlar bara om effektivitet."},
+ ]
+},
+// ──────────────────────────────────────────────────────────
+// M6: REPETITION & SLUTPROV
+// ──────────────────────────────────────────────────────────
+{id:6,title:"Repetition & Slutprov",subtitle:"Alla fyra metoder — din slutliga kunskapskontroll",icon:"🏆",color:"#D97706",
+ mathematician:{name:"Carl Friedrich Gauss",years:"1777–1855",portrait:"⭐",
+  text:"Carl Friedrich Gauss kallas 'matematikernas prins' och räknas som en av historiens största matematiker. Född i Brunswick i en fattig familj, visade han matematisk begåvning redan som barn — enligt legenden summerade han 1+2+3+...+100 på sekunder (50×101=5050) i skolan. Gauss bidrog till talteori, statistik, geometri och fysik. Hans fundamentalsats för algebran bevisade att en polynom-ekvation av grad n alltid har exakt n rötter (räknat med multiplicitet, komplexa inkluderade). Den teorin förenar PQ-formeln, nollproduktmetoden och alla andra lösningsmetoder under ett gemensamt matematiskt tak.",
+  quote:"Matematik är vetenskapernas drottning, och talteori är matematikens drottning."},
+ concepts:[
+  {title:"Metodöversikt — fyra vägar till samma svar",body:"PQ-formeln: universell, alltid. Formel: x=−p/2±√((p/2)²−q). Test-lösningsformeln: för heltalslösningar, Viète x₁+x₂=−p och x₁·x₂=q. Kvadratrots-metoden: när formen är x²=a eller (x+k)²=a. Nollproduktmetoden: när faktorer kan identifieras, A·B=0→A=0 eller B=0.",
+   formula:"Fyra metoder — en typ av ekvation",formulaExplain:"Välj alltid utifrån ekvationens form — sparar tid och minskar räknefel"},
+  {title:"Kontrollera svaret",body:"En säker vana: sätt alltid in dina svar i originaluttrycket. Om x=a är en rot i x²+px+q=0 ska a²+p·a+q=0. Det tar tio sekunder och ger dig hundraprocentig säkerhet. Gauss sa: 'Räkna aldrig förrän du tänkt.' Vi tillägger: 'Kontrollera alltid efter att du räknat.'",
+   formula:"Sätt in → om ekvationen stämmer → korrekt svar",formulaExplain:"a²+p·a+q = 0 om och bara om a är en rot"},
+  {title:"Vanliga fel att undvika",body:"1) Glömma ± vid kvadratrot. 2) Använda nollprodukt när H.S ≠ 0. 3) Blanda ihop p med b (kom ihåg: om ekvationen är ax²+bx+c=0 ska du dela med a för att få p=b/a och q=c/a). 4) Räkna (p/2)² fel — kvadrera hela uttrycket, inte bara p.",
+   formula:"(−5/2)² = 6,25  ≠  −25/2",formulaExplain:"Vanligt fel: ta −(p/2)² istället för (p/2)² i PQ-formeln"},
+ ],
+ practice:[
+  {id:"rep1",q:"PQ: Lös x² + 6x + 8 = 0.",eq:"x² + 6x + 8 = 0",
+   opts:["A) x = −2 eller x = −4","B) x = 2 eller x = 4","C) x = −1 eller x = −8","D) x = −3 (dubbelrot)"],
+   correct:"A",praise:"Rätt! p=6,q=8. x=−3±√(9−8)=−3±1. x=−2 el. x=−4.",
+   explain:"p=6,q=8. x=−3±√(9−8)=−3±1 → x=−2 el. x=−4.",
+   socratic:"Beräkna (p/2)² och q var för sig. Vad är diskriminanten D? Vad är √D?"},
+  {id:"rep2",q:"Nollprodukt: Lös x(x−9) = 0.",eq:"x(x−9) = 0",
+   opts:["A) x = 9","B) x = 0 eller x = 9","C) x = 0 eller x = −9","D) x = 9 eller x = 1"],
+   correct:"B",praise:"Korrekt! x=0 el. x−9=0→x=9.",
+   explain:"Nollprodukt: x=0 ELLER x−9=0→x=9.",
+   socratic:"Hur många faktorer finns? Sätt var och en = 0 separat."},
+  {id:"rep3",q:"Kvadratrot: Lös (x+4)² = 25.",eq:"(x+4)² = 25",
+   opts:["A) x = 1 eller x = −9","B) x = 5 eller x = −5","C) x = 21 eller x = −29","D) x = 1"],
+   correct:"A",praise:"Perfekt! x+4=±5 → x=1 eller x=−9.",
+   explain:"x+4=±5. x=−4+5=1 el. x=−4−5=−9.",
+   socratic:"Ta kvadratroten av 25 — kom ihåg ±. Nu har du x+4=5 och x+4=−5. Lös båda."},
+  {id:"rep4",q:"Test-lösning: Lös x² − 10x + 21 = 0.",eq:"x² − 10x + 21 = 0",
+   opts:["A) x = 3 eller x = 7","B) x = −3 eller x = −7","C) x = 21 eller x = 1","D) x = 5 (dubbelrot)"],
+   correct:"A",praise:"Rätt! Summa=10, produkt=21. 3+7=10 ✓, 3·7=21 ✓.",
+   explain:"p=−10→summa=10. q=21→produkt=21. 3 och 7: 3+7=10 ✓, 3·7=21 ✓.",
+   socratic:"Vilka faktorer av 21 summerar till 10? Prova systematiskt: (1,21), (3,7)..."},
+ ],
+ quiz:[
+  {id:"repq1",q:"x²−81=0. Snabbaste metod + svar:",opts:["A) Kvadratrot: x=±9","B) PQ: x=0±9","C) Nollprodukt: (x−9)(x+9)=0","D) A och C ger samma svar och är lika snabba"],correct:"D",explain:"Båda går bra och ger x=±9. Kvadratrot och nollprodukt är exakt lika snabba här."},
+  {id:"repq2",q:"x²+5x+6=0 med test-lösning:",opts:["A) x=−2 el. x=−3","B) x=2 el. x=3","C) x=6 el. x=1","D) x=−1 el. x=−6"],correct:"A",explain:"Summa=−5, produkt=6. −2+(−3)=−5 ✓, (−2)(−3)=6 ✓."},
+  {id:"repq3",q:"Vilket fel finns i: x²−9=0 → (x−3)²=0 → x=3?",opts:["A) Inget fel, x=3 är korrekt","B) x²−9≠(x−3)². Det är (x−3)(x+3)=0 → x=3 el. x=−3","C) x²−9 kan inte faktoriseras","D) Man måste använda PQ"],correct:"B",explain:"x²−9=(x−3)(x+3) (kvadratskillnad), INTE (x−3)². Nollprodukt ger x=3 el. x=−3."},
+  {id:"repq4",q:"x²+x+5=0. Antal reella lösningar:",opts:["A) 2","B) 1","C) 0","D) 3"],correct:"C",explain:"p=1,q=5. D=(½)²−5=0,25−5=−4,75<0. Inga reella lösningar."},
+  {id:"repq5",q:"PQ-formeln ger: x=−p/2±√((p/2)²−q). Om p=4 och q=4, är svaret:",opts:["A) x=−2 (dubbelrot)","B) x=2 (dubbelrot)","C) x=0 el. x=−4","D) x=2 el. x=−2"],correct:"A",explain:"x=−2±√(4−4)=−2±0=−2. Dubbelrot x=−2."},
+ ],
+ test:[
+  {id:"rept1",q:"Lös x²+x−12=0 (välj bästa metod).",opts:["A) x=3 el. x=−4","B) x=−3 el. x=4","C) x=6 el. x=−2","D) x=4 el. x=3"],correct:"A",explain:"Test-lösning: summa=−1,produkt=−12. 3+(−4)=−1 ✓, 3·(−4)=−12 ✓."},
+  {id:"rept2",q:"Lös 3x²−12=0.",opts:["A) x=2 el. x=−2","B) x=4","C) x=2","D) x=±√12"],correct:"A",explain:"3x²=12→x²=4→x=±2. Kvadratrot."},
+  {id:"rept3",q:"Lös (x+3)(x−5)=0.",opts:["A) x=−3 el. x=5","B) x=3 el. x=−5","C) x=15","D) x=−3 el. x=−5"],correct:"A",explain:"Nollprodukt: x+3=0→x=−3. x−5=0→x=5."},
+  {id:"rept4",q:"Lös x²−6x+7=0 med PQ.",opts:["A) x=3±√2","B) x=3±√7","C) x=6±√2","D) Inga reella lösningar"],correct:"A",explain:"p=−6,q=7. x=3±√(9−7)=3±√2."},
+  {id:"rept5",q:"Vilken påstående om andragradsekvationer är alltid sant?",opts:["A) Det finns alltid två lösningar","B) Det finns 0, 1 eller 2 reella lösningar","C) PQ-formeln ger alltid irrationella svar","D) Nollproduktmetoden är alltid snabbast"],correct:"B",explain:"Fundamentalsatsen + diskriminanten: D>0→2 lösningar, D=0→1, D<0→0 reella lösningar."},
+ ]
+}
+];
+
+// ── STATE ────────────────────────────────────────────────────
+const GS={
+  screen:'intro',moment:0,phase:'bio',
+  practiceIdx:0,practiceResults:{},
+  quizResults:{},quizNeedsReview:[],
+  testResults:{},testNeedsRetry:[],testRetryIdx:0,testRetryAnswered:false,
+  completedMoments:[],xp:0,socraticShown:{}
+};
+const XP_PRACTICE=25,XP_QUIZ=60,XP_TEST=120;
+const PRAISE=['🌟 Utmärkt!','🎯 Spot on!','✅ Korrekt!','🏆 Briljant!','💡 Exakt!','🚀 Perfekt!','🎓 Bra jobbat!'];
+function rnd(a){return a[Math.floor(Math.random()*a.length)];}
+function addXP(n){GS.xp+=n;updateRankHeader();}
+function updateRankHeader(){
+  const r=getRank(GS.xp),pct=r.next<9999?Math.round((GS.xp-r.min)/(r.next-r.min)*100):100;
+  document.getElementById('rankIcon').textContent=r.icon;
+  document.getElementById('rankLabel').textContent=r.label;
+  document.getElementById('xpFill').style.width=pct+'%';
+  document.getElementById('xpLabel').textContent=GS.xp+' XP';
+}
+
+// ── RENDER ───────────────────────────────────────────────────
+function render(){
+  const app=document.getElementById('app');
+  app.className='fade';void app.offsetWidth;app.className='fade';
+  if(GS.screen==='intro')    renderIntro(app);
+  else if(GS.screen==='moment')  renderMoment(app);
+  else if(GS.screen==='quiz')    renderQuiz(app);
+  else if(GS.screen==='quizreview') renderQuizReview(app);
+  else if(GS.screen==='test')    renderTest(app);
+  else if(GS.screen==='testresult') renderTestResult(app);
+  else if(GS.screen==='testretry') renderTestRetry(app);
+  else if(GS.screen==='rankup')  renderRankUp(app);
+  else if(GS.screen==='done')    renderDone(app);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ── INTRO ────────────────────────────────────────────────────
+function renderIntro(app){
+  app.innerHTML=`
+  <div class="intro-hero">
+    <h1>LÖS<br><span>ANDRAGRADS-<br>EKVATIONER</span></h1>
+    <p style="color:var(--muted);font-size:15px;max-width:460px;margin:10px auto 20px;line-height:1.6">
+      Fyra metoder. Sex moment. Från nybörjare till mästare — ett steg i taget.
+    </p>
+    <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:16px">
+      <span class="method-badge m1">PQ-formeln</span>
+      <span class="method-badge m2">Test-lösning</span>
+      <span class="method-badge m3">Kvadratrot</span>
+      <span class="method-badge m4">Nollprodukt</span>
+    </div>
+  </div>
+  <div class="moment-preview">
+    ${MOMENTS.map((m,i)=>{
+      const done=GS.completedMoments.includes(m.id);
+      const locked=i>0&&!GS.completedMoments.includes(MOMENTS[i-1].id);
+      return`<div class="mp-card" style="opacity:${locked?.5:1};cursor:${locked?'not-allowed':'pointer'};border:1.5px solid ${done?'var(--ok-bd)':'var(--border)'};background:${done?'var(--ok-bg)':'var(--surface)'}" onclick="${locked?'':`startMoment(${i})`}">
+        <div class="mp-num">${done?'✅':locked?'🔒':'▶'} MOMENT ${m.id}</div>
+        <div class="mp-title">${m.icon} ${m.title}</div>
+        <div class="mp-sub">${m.subtitle}</div>
+      </div>`;
+    }).join('')}
+  </div>
+  <div class="card" style="margin-top:4px">
+    <div style="font-size:13px;color:var(--muted);line-height:1.65">
+      <strong style="color:var(--text)">Hur det fungerar:</strong><br>
+      📖 Biografi → 📚 Koncept → ✏️ Övningar (Sokratiska ledtrådar vid fel) → 
+      📋 Quiz (alla rätt!) → 📝 Prov (≥70%) → 🏅 Rankuppgradering
+    </div>
+  </div>`;
+}
+
+function startMoment(i){
+  GS.moment=i;GS.phase='bio';GS.practiceIdx=0;
+  GS.practiceResults={};GS.quizResults={};GS.quizNeedsReview=[];
+  GS.testResults={};GS.testNeedsRetry=[];GS.testRetryIdx=0;
+  GS.testRetryAnswered=false;GS.socraticShown={};
+  GS.screen='moment';render();
+}
+
+// ── MOMENT PHASES ────────────────────────────────────────────
+function renderMoment(app){
+  const m=MOMENTS[GS.moment],ph=GS.phase;
+  let html=`<div style="display:flex;align-items:center;gap:9px;margin-bottom:14px;flex-wrap:wrap">
+    <button class="btn btn-sec" style="padding:7px 12px;font-size:12px" onclick="GS.screen='intro';render()">← Alla moment</button>
+    <span class="method-badge m${Math.min(GS.moment+1,4)}">Moment ${m.id}/6 · ${m.title}</span>
+  </div>`;
+  if(ph==='bio') html+=renderBio(m);
+  else if(ph.startsWith('concept')) html+=renderConcept(m);
+  else if(ph==='practice') html+=renderPractice(m);
+  app.innerHTML=html;
+}
+
+function renderBio(m){
+  const mt=m.mathematician;
+  return`<div class="bio-card">
+    <div class="bio-portrait">${mt.portrait}</div>
+    <div>
+      <div class="bio-name">${mt.name}</div>
+      <div class="bio-years">${mt.years}</div>
+      <div class="bio-text">${mt.text}</div>
+      <div class="bio-quote">"${mt.quote}"</div>
+    </div>
+  </div>
+  <div class="btn-row"><button class="btn btn-full" onclick="GS.phase='concept0';render()">📚 GÅ TILL BEGREPPEN →</button></div>`;
+}
+
+function renderConcept(m){
+  const idx=parseInt(GS.phase.replace('concept',''));
+  const c=m.concepts[idx],total=m.concepts.length,isLast=idx===total-1;
+  return`<div class="prog-wrap">
+    <div class="prog-track"><div class="prog-fill" style="width:${Math.round((idx+1)/total*100)}%"></div></div>
+    <div style="font-size:12px;color:var(--muted);font-weight:600;white-space:nowrap">Begrepp ${idx+1} av ${total}</div>
+  </div>
+  <div class="concept-card" style="border-left:4px solid ${m.color}">
+    <div class="concept-title" style="color:${m.color}">${c.title}</div>
+    <div class="concept-body">${c.body}</div>
+    <div class="formula">${c.formula}</div>
+    <div class="formula-explain">${c.formulaExplain}</div>
+  </div>
+  <div class="btn-row">
+    ${idx>0?`<button class="btn btn-sec" onclick="GS.phase='concept${idx-1}';render()">← Föregående</button>`:''}
+    ${isLast
+      ?`<button class="btn btn-full btn-ok" onclick="GS.phase='practice';GS.practiceIdx=0;render()">✏️ BÖRJA ÖVA →</button>`
+      :`<button class="btn btn-full" onclick="GS.phase='concept${idx+1}';render()">NÄSTA BEGREPP →</button>`}
+  </div>`;
+}
+
+function renderPractice(m){
+  const questions=m.practice,total=questions.length,allDone=GS.practiceIdx>=total;
+  if(allDone) return`<div class="card ok-accent" style="text-align:center;padding:26px">
+    <div style="font-size:40px">🎉</div>
+    <h2 style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;margin:10px 0 5px">Övningarna klara!</h2>
+    <p style="color:var(--muted);font-size:14px;margin-bottom:14px">Nu är det dags för quizet. Alla rätt krävs för att gå vidare!</p>
+    <button class="btn btn-full btn-ok" onclick="startQuiz()">📋 STARTA QUIZET →</button>
+  </div>`;
+
+  const q=questions[GS.practiceIdx],res=GS.practiceResults[q.id];
+  const answered=res!==undefined,socShown=GS.socraticShown[q.id];
+  const LETTERS=['A','B','C','D'];
+
+  return`<div class="prog-wrap">
+    <div class="prog-track"><div class="prog-fill" style="width:${Math.round(GS.practiceIdx/total*100)}%"></div></div>
+    <div style="font-size:12px;color:var(--muted);font-weight:600;white-space:nowrap">Uppgift ${GS.practiceIdx+1} av ${total}</div>
+  </div>
+  <div class="q-card ${answered&&res.correct?'ok-accent':''}">
+    <div class="q-meta"><span class="method-badge m${Math.min(GS.moment+1,4)}">Övning</span></div>
+    <div class="q-txt">${q.q}</div>
+    ${q.eq?`<div class="q-eq">${q.eq}</div>`:''}
+    <div class="options">
+      ${q.opts.map((opt,i)=>{
+        const letter=LETTERS[i],isChosen=answered&&res.chosen===letter,isCorrect=letter===q.correct;
+        let cls='';
+        if(answered){if(isChosen&&isCorrect)cls='correct locked';else if(isChosen&&!isCorrect)cls='wrong locked';else if(isCorrect)cls='show-correct locked';else cls='locked';}
+        return`<button class="opt ${cls}" onclick="${answered?'':` practicePick('${q.id}','${letter}')`}">
+          <div class="opt-letter">${answered&&isCorrect?'✓':answered&&isChosen&&!isCorrect?'✗':letter}</div>
+          <div>${opt.replace(/^[A-D]\)\s*/,'')}</div>
+        </button>`;
+      }).join('')}
+    </div>
+    ${answered&&res.correct?`<div class="fb ok"><strong>${rnd(PRAISE)} <span class="xp-burst">+${XP_PRACTICE} XP</span></strong>${q.praise}</div>
+      <button class="btn btn-full" style="margin-top:10px" onclick="practiceNext()">${GS.practiceIdx+1<total?'NÄSTA UPPGIFT →':'🎉 ALLA KLARA →'}</button>`:''}
+    ${answered&&!res.correct&&!socShown?`<div class="fb soc"><strong>🤔 Sokratisk fråga:</strong><div class="hq">${q.socratic}</div></div>
+      <button class="btn btn-full" style="margin-top:10px" onclick="practiceRetry('${q.id}')">🔄 FÖRSÖK IGEN</button>`:''}
+    ${answered&&!res.correct&&socShown?`<div class="fb soc"><strong>🤔 Sokratisk fråga:</strong><div class="hq">${q.socratic}</div></div>
+      <div class="fb err" style="margin-top:8px"><strong>📖 Förklaring:</strong> ${q.explain}</div>
+      <button class="btn btn-full" style="margin-top:10px" onclick="practiceNext()">${GS.practiceIdx+1<total?'NÄSTA →':'🎉 KLARA →'}</button>`:''}
+  </div>`;
+}
+
+function practicePick(qid,letter){
+  const m=MOMENTS[GS.moment],q=m.practice.find(x=>x.id===qid);
+  GS.practiceResults[qid]={correct:letter===q.correct,chosen:letter};
+  if(letter===q.correct)addXP(XP_PRACTICE);
+  render();
+}
+function practiceRetry(qid){GS.socraticShown[qid]=true;GS.practiceResults[qid]=undefined;render();}
+function practiceNext(){GS.practiceIdx++;render();}
+
+// ── QUIZ ─────────────────────────────────────────────────────
+function startQuiz(){GS.quizResults={};GS.quizNeedsReview=[];GS.screen='quiz';render();}
+
+function renderQuiz(app){
+  const m=MOMENTS[GS.moment],isRev=GS.quizNeedsReview.length>0;
+  const questions=isRev?m.quiz.filter(q=>GS.quizNeedsReview.includes(q.id)):m.quiz;
+  const unanswered=questions.filter(q=>GS.quizResults[q.id]===undefined);
+  const done=questions.length-unanswered.length;
+
+  if(unanswered.length===0&&questions.length>0){
+    if(questions.every(q=>GS.quizResults[q.id]?.correct)){
+      addXP(XP_QUIZ);GS.quizNeedsReview=[];GS.screen='test';
+      GS.testResults={};GS.testNeedsRetry=[];GS.testRetryAnswered=false;render();return;
+    }
+    GS.screen='quizreview';render();return;
+  }
+
+  const q=unanswered[0],res=GS.quizResults[q.id],answered=res!==undefined;
+  const LETTERS=['A','B','C','D'];
+
+  app.innerHTML=`
+  <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap">
+    <button class="btn btn-sec" style="padding:7px 12px;font-size:12px" onclick="GS.screen='intro';render()">← Alla moment</button>
+    <span class="method-badge m${Math.min(GS.moment+1,4)}">${isRev?'🔄 Quiz — repetition':'📋 Quiz'}</span>
+    <span style="font-size:12px;color:var(--muted)">Alla rätt krävs</span>
+  </div>
+  ${isRev?`<div class="fb" style="background:var(--warn-bg);border:1px solid var(--warn-bd);color:var(--warn);margin-bottom:11px"><strong>🔄 Repetition</strong> Bara de frågor du hade fel på.</div>`:''}
+  <div class="prog-wrap">
+    <div class="prog-track"><div class="prog-fill" style="width:${Math.round(done/questions.length*100)}%"></div></div>
+    <div style="font-size:12px;color:var(--muted);font-weight:600;white-space:nowrap">${done}/${questions.length}</div>
+  </div>
+  <div class="q-card ${answered&&res.correct?'ok-accent':''}">
+    <div class="q-meta"><span class="method-badge m${Math.min(GS.moment+1,4)}">Quizfråga ${done+1}</span></div>
+    <div class="q-txt">${q.q}</div>
+    <div class="options">
+      ${q.opts.map((opt,i)=>{
+        const letter=LETTERS[i],isChosen=answered&&res.chosen===letter,isCorrect=letter===q.correct;
+        let cls='';
+        if(answered){if(isChosen&&isCorrect)cls='correct locked';else if(isChosen&&!isCorrect)cls='wrong locked';else if(isCorrect)cls='show-correct locked';else cls='locked';}
+        return`<button class="opt ${cls}" onclick="${answered?'':` quizPick('${q.id}','${letter}')`}">
+          <div class="opt-letter">${answered&&isCorrect?'✓':answered&&isChosen&&!isCorrect?'✗':letter}</div>
+          <div>${opt.replace(/^[A-D]\)\s*/,'')}</div>
+        </button>`;
+      }).join('')}
+    </div>
+    ${answered?`<div class="fb ${res.correct?'ok':'err'}" style="margin-top:10px"><strong>${res.correct?rnd(PRAISE):'❌ Inte rätt.'}</strong> ${q.explain}</div>
+    <button class="btn btn-full" style="margin-top:10px" onclick="render()">NÄSTA →</button>`:''}
+  </div>`;
+}
+
+function quizPick(qid,letter){
+  const m=MOMENTS[GS.moment],q=m.quiz.find(x=>x.id===qid);
+  GS.quizResults[qid]={correct:letter===q.correct,chosen:letter};render();
+}
+
+function renderQuizReview(app){
+  const m=MOMENTS[GS.moment];
+  app.innerHTML=`<div class="sec-hd" style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;margin-bottom:4px">📋 Quizresultat</div>
+  <p style="color:var(--muted);font-size:13px;margin-bottom:14px">Repetera förklaringarna och gör om felen.</p>
+  ${m.quiz.map(q=>{
+    const res=GS.quizResults[q.id],isOk=res?.correct;
+    const chosenText=res?q.opts.find(o=>o.startsWith(res.chosen)):'—';
+    const correctText=q.opts.find(o=>o.startsWith(q.correct));
+    return`<div class="review-row">
+      <div style="font-size:18px;flex-shrink:0;margin-top:2px">${isOk?'✅':'❌'}</div>
+      <div style="flex:1">
+        <div style="font-weight:600;font-size:13px;margin-bottom:3px">${q.q}</div>
+        ${isOk?`<span class="sbadge sb-ok">✓ ${correctText}</span>`
+          :`<span style="font-size:13px;color:var(--err);text-decoration:line-through">${chosenText}</span><br>
+           <span class="sbadge sb-ok" style="margin-top:4px">✓ ${correctText}</span>
+           <div style="font-size:12px;color:var(--muted);margin-top:4px;line-height:1.5">💡 ${q.explain}</div>`}
+      </div>
+    </div>`;
+  }).join('')}
+  <button class="btn btn-full" style="margin-top:14px" onclick="retryWrongQuiz()">
+    🔄 GÖR OM FELEN (${m.quiz.filter(q=>!GS.quizResults[q.id]?.correct).length} st)
+  </button>`;
+}
+
+function retryWrongQuiz(){
+  const m=MOMENTS[GS.moment];
+  GS.quizNeedsReview=m.quiz.filter(q=>!GS.quizResults[q.id]?.correct).map(q=>q.id);
+  GS.quizNeedsReview.forEach(id=>{GS.quizResults[id]=undefined;});
+  GS.screen='quiz';render();
+}
+
+// ── TEST ─────────────────────────────────────────────────────
+function renderTest(app){
+  const m=MOMENTS[GS.moment];
+  const toAnswer=m.test.filter(q=>GS.testResults[q.id]===undefined);
+  if(toAnswer.length===0){GS.screen='testresult';render();return;}
+  const q=toAnswer[0],done=m.test.length-toAnswer.length;
+  const LETTERS=['A','B','C','D'];
+  app.innerHTML=`
+  <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap">
+    <span class="chip-gold">📝 Prov · Godkänt ≥ 70%</span>
+    <span style="font-size:12px;color:var(--muted)">${m.title}</span>
+  </div>
+  <div class="prog-wrap">
+    <div class="prog-track"><div class="prog-fill" style="width:${Math.round(done/m.test.length*100)}%;background:var(--gold)"></div></div>
+    <div style="font-size:12px;color:var(--muted);font-weight:600;white-space:nowrap">${done}/${m.test.length}</div>
+  </div>
+  <div class="q-card">
+    <div class="q-meta"><span class="chip-gold">Provfråga ${done+1}</span></div>
+    <div class="q-txt">${q.q}</div>
+    ${q.eq?`<div class="q-eq">${q.eq}</div>`:''}
+    <div class="options">
+      ${q.opts.map((opt,i)=>{
+        const letter=LETTERS[i];
+        return`<button class="opt" onclick="testPick('${q.id}','${letter}')">
+          <div class="opt-letter">${letter}</div><div>${opt.replace(/^[A-D]\)\s*/,'')}</div>
+        </button>`;
+      }).join('')}
+    </div>
+  </div>`;
+}
+
+function testPick(qid,letter){
+  const m=MOMENTS[GS.moment],q=m.test.find(x=>x.id===qid);
+  GS.testResults[qid]={correct:letter===q.correct,chosen:letter};render();
+}
+
+function renderTestResult(app){
+  const m=MOMENTS[GS.moment];
+  const correct=m.test.filter(q=>GS.testResults[q.id]?.correct).length;
+  const total=m.test.length,pct=Math.round(correct/total*100),passed=pct>=70;
+  const wrong=m.test.filter(q=>!GS.testResults[q.id]?.correct);
+
+  if(passed&&wrong.length===0){
+    if(!GS.completedMoments.includes(m.id)){addXP(XP_TEST);GS.completedMoments.push(m.id);}
+    GS.screen='rankup';render();return;
+  }
+
+  app.innerHTML=`
+  <div class="card" style="text-align:center;padding:22px">
+    <div class="score-c ${passed?'pass':'fail'}">
+      <div class="score-pct">${pct}%</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:1px">${correct}/${total}</div>
+    </div>
+    <h2 style="font-family:'Syne',sans-serif;font-size:19px;font-weight:800">${passed?'🎓 Godkänt!':'📚 Ej godkänt'}</h2>
+    <p style="color:var(--muted);margin-top:5px;font-size:13px">${passed?`Du klarade provet med ${pct}%! Rätta nu dina fel för att befästa kunskapen.`:`${pct}% — behöver 70%. Läs förklaringarna och försök igen.`}</p>
+  </div>
+  <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;margin:12px 0 8px">Genomgång</div>
+  ${m.test.map(q=>{
+    const res=GS.testResults[q.id],isOk=res?.correct;
+    const chosenText=res?q.opts.find(o=>o.startsWith(res.chosen)):'—';
+    const correctText=q.opts.find(o=>o.startsWith(q.correct));
+    return`<div class="review-row">
+      <div style="font-size:16px;flex-shrink:0;margin-top:2px">${isOk?'✅':'❌'}</div>
+      <div style="flex:1">
+        <div style="font-weight:600;font-size:13px;margin-bottom:2px">${q.q}</div>
+        ${isOk?`<span class="sbadge sb-ok">✓ ${correctText}</span>`
+          :`<span style="font-size:12px;color:var(--err);text-decoration:line-through">${chosenText}</span> → <span class="sbadge sb-ok">${correctText}</span>
+           <div style="font-size:12px;color:var(--muted);margin-top:3px;line-height:1.5">💡 ${q.explain}</div>`}
+      </div>
+      <span class="sbadge ${isOk?'sb-ok':'sb-err'}">${isOk?'RÄTT':'FEL'}</span>
+    </div>`;
+  }).join('')}
+  <div class="btn-row" style="margin-top:14px">
+    ${passed&&wrong.length>0
+      ?`<button class="btn btn-full btn-ok" onclick="startTestRetry()">🔄 GÖR OM FELEN (${wrong.length} st) →</button>`
+      :!passed?`<button class="btn btn-full" onclick="GS.testResults={};GS.screen='test';render()">🔄 GÖR OM PROVET</button>`:''}
+  </div>`;
+}
+
+function startTestRetry(){
+  const m=MOMENTS[GS.moment];
+  GS.testNeedsRetry=m.test.filter(q=>!GS.testResults[q.id]?.correct).map(q=>q.id);
+  GS.testRetryIdx=0;GS.testRetryAnswered=false;GS.screen='testretry';render();
+}
+
+function renderTestRetry(app){
+  const m=MOMENTS[GS.moment];
+  const toRetry=m.test.filter(q=>GS.testNeedsRetry.includes(q.id));
+  const current=toRetry[GS.testRetryIdx];
+  if(!current||GS.testRetryIdx>=toRetry.length){
+    if(!GS.completedMoments.includes(m.id)){addXP(XP_TEST);GS.completedMoments.push(m.id);}
+    GS.screen='rankup';render();return;
+  }
+  const res=GS.testResults[current.id],LETTERS=['A','B','C','D'];
+  if(!GS.testRetryAnswered){
+    app.innerHTML=`<div class="fb" style="background:var(--warn-bg);border:1px solid var(--warn-bd);color:var(--warn);margin-bottom:11px"><strong>🔄 Rätta dina fel</strong> — ${GS.testRetryIdx+1} av ${toRetry.length}</div>
+    <div class="q-card">
+      <div class="q-meta"><span class="chip-gold">Omgång</span></div>
+      <div class="q-txt">${current.q}</div>
+      <div class="options">
+        ${current.opts.map((opt,i)=>{const letter=LETTERS[i];
+          return`<button class="opt" onclick="testRetryPick('${current.id}','${letter}')">
+            <div class="opt-letter">${letter}</div><div>${opt.replace(/^[A-D]\)\s*/,'')}</div>
+          </button>`;}).join('')}
+      </div>
+    </div>`;
+  } else {
+    const correct=res.correct;
+    const ct=current.opts.find(o=>o.startsWith(current.correct));
+    app.innerHTML=`<div class="q-card ${correct?'ok-accent':''}">
+      <div class="q-txt">${current.q}</div>
+      <div class="options">
+        ${current.opts.map((opt,i)=>{
+          const letter=LETTERS[i],isChosen=res.chosen===letter,isCorrect=letter===current.correct;
+          let cls=isChosen&&isCorrect?'correct locked':isChosen&&!isCorrect?'wrong locked':isCorrect?'show-correct locked':'locked';
+          return`<button class="opt ${cls}"><div class="opt-letter">${isCorrect?'✓':isChosen?'✗':letter}</div><div>${opt.replace(/^[A-D]\)\s*/,'')}</div></button>`;
+        }).join('')}
+      </div>
+      <div class="fb ${correct?'ok':'err'}" style="margin-top:10px">
+        <strong>${correct?rnd(PRAISE)+' Rätt den här gången!':'❌ Fortfarande fel.'}</strong> ${current.explain}
+      </div>
+      <button class="btn btn-full" style="margin-top:11px" onclick="testRetryNext()">
+        ${GS.testRetryIdx+1<toRetry.length?'NÄSTA →':'✅ KLARA MOMENT →'}
+      </button>
+    </div>`;
+  }
+}
+
+function testRetryPick(qid,letter){
+  const m=MOMENTS[GS.moment],q=m.test.find(x=>x.id===qid);
+  GS.testResults[qid]={correct:letter===q.correct,chosen:letter};
+  GS.testRetryAnswered=true;render();
+}
+function testRetryNext(){
+  GS.testRetryIdx++;GS.testRetryAnswered=false;
+  const m=MOMENTS[GS.moment];
+  const toRetry=m.test.filter(q=>GS.testNeedsRetry.includes(q.id));
+  if(GS.testRetryIdx>=toRetry.length){
+    if(!GS.completedMoments.includes(m.id)){addXP(XP_TEST);GS.completedMoments.push(m.id);}
+    GS.screen='rankup';
+  }
+  render();
+}
+
+// ── RANK UP ──────────────────────────────────────────────────
+function renderRankUp(app){
+  const m=MOMENTS[GS.moment],rank=getRank(GS.xp);
+  const allDone=GS.completedMoments.length===MOMENTS.length;
+  app.innerHTML=`<div class="rank-up">
+    <div class="rank-up-icon">${rank.icon}</div>
+    <div style="font-family:'Syne',sans-serif;font-size:12px;font-weight:800;color:var(--muted);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:6px">⭐⭐⭐ MOMENT ${m.id} KLARAT ⭐⭐⭐</div>
+    <div style="font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:var(--math)">${m.title}</div>
+    <div style="color:var(--muted);font-size:14px;margin-top:4px;margin-bottom:14px">👤 ${m.mathematician.name}</div>
+    <div style="background:var(--math-bg);border:1px solid var(--math-bd);border-radius:10px;padding:12px 16px;max-width:300px;margin:0 auto 16px">
+      <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:var(--math)">${rank.icon} ${rank.label}</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:2px">${GS.xp} XP totalt</div>
+    </div>
+    ${allDone?`<div class="fb ok" style="max-width:380px;margin:0 auto 14px"><strong>🏆 ALLA 6 MOMENT KLARADE!</strong>Du är nu en Mästare på andragradsekvationer!</div>`
+      :`<div style="font-size:13px;color:var(--muted);margin-bottom:14px">${MOMENTS.length-GS.completedMoments.length} moment kvar till Mästaren!</div>`}
+    <button class="btn btn-full ${allDone?'btn-gold':''}" onclick="${allDone?`GS.screen='done';render()`:`GS.screen='intro';render()`}">
+      ${allDone?'🏆 SE DITT SLUTRESULTAT →':'→ NÄSTA MOMENT'}
+    </button>
+  </div>`;
+}
+
+// ── DONE ─────────────────────────────────────────────────────
+function renderDone(app){
+  const rank=getRank(GS.xp);
+  app.innerHTML=`<div style="text-align:center;padding:28px 14px">
+    <div style="font-size:52px;margin-bottom:8px">🧮</div>
+    <h1 style="font-family:'Syne',sans-serif;font-size:30px;font-weight:800;color:var(--math)">GRATTIS, MÄSTARE!</h1>
+    <p style="color:var(--muted);font-size:14px;margin:7px 0 18px">Du kan nu lösa andragradsekvationer med fyra metoder!</p>
+    <div style="background:var(--math-bg);border:2px solid var(--math-bd);border-radius:12px;padding:18px;max-width:380px;margin:0 auto 18px">
+      <div style="font-size:42px">${rank.icon}</div>
+      <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--math)">${rank.label}</div>
+      <div style="font-size:15px;color:var(--muted);margin-top:3px">${GS.xp} XP</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:420px;margin:0 auto 16px">
+      ${MOMENTS.map(m=>`<div style="background:var(--ok-bg);border:1px solid var(--ok-bd);border-radius:8px;padding:9px 6px;text-align:center">
+        <div style="font-size:18px">${m.icon}</div>
+        <div style="font-size:10px;font-weight:700;color:var(--ok);font-family:'Syne',sans-serif;margin-top:2px">${m.title}</div>
+      </div>`).join('')}
+    </div>
+    <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:16px">
+      <span class="method-badge m1">PQ-formeln ✓</span>
+      <span class="method-badge m2">Test-lösning ✓</span>
+      <span class="method-badge m3">Kvadratrot ✓</span>
+      <span class="method-badge m4">Nollprodukt ✓</span>
+    </div>
+    <button class="btn" onclick="GS.screen='intro';render()">🔄 Spela igen</button>
+  </div>`;
+}
+
+// ── INIT ─────────────────────────────────────────────────────
+updateRankHeader();render();
+</script>
+</body>
+</html>
