@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FYSIKERN — Fysik 1 Gy11</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#F4F6F9; --surface:#fff; --border:#D1D9E0; --bs:#B0BCC8;
+  --text:#1A2332; --muted:#4A5568;
+  --phys:#0D4F8C; --phys-bg:#E8F1FB; --phys-bd:#A3C4E8;
+  --ok:#1A7A4A; --ok-bg:#E8F5EE; --ok-bd:#A3D4B5;
+  --err:#C0392B; --err-bg:#FDECEA; --err-bd:#F5A89A;
+  --warn:#92600A; --warn-bg:#FEF3E2; --warn-bd:#F5C97A;
+  --gold:#D97706; --silver:#6B7280; --bronze:#92600A;
+  --accent:#7C3AAE; --accent-bg:#F3E8FF;
+  --info-bg:#EBF4FD;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);font-family:'DM Sans',system-ui,sans-serif;color:var(--text);font-size:16px;min-height:100vh;}
+h1,h2,h3,.rank-title{font-family:'Syne',sans-serif;}
+
+/* NAV */
+#header{padding:12px 20px;background:var(--surface);border-bottom:2px solid var(--border);position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,0.07);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.logo{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;letter-spacing:-0.5px;}
+.logo span{color:var(--phys);}
+.rank-pill{display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--bs);border-radius:20px;padding:6px 14px;}
+.rank-icon{font-size:18px;}
+.rank-label{font-family:'Syne',sans-serif;font-size:12px;font-weight:800;color:var(--phys);}
+.xp-bar-wrap{flex:1;max-width:120px;}
+.xp-track{background:var(--border);border-radius:5px;height:6px;}
+.xp-fill{height:6px;border-radius:5px;background:var(--phys);transition:width 0.5s ease;}
+.xp-label{font-size:10px;color:var(--muted);margin-top:2px;}
+
+/* APP */
+#app{max-width:760px;margin:0 auto;padding:24px 18px 80px;}
+.fade-in{animation:fadeIn 0.35s ease both;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,0.05);}
+.card.phys-accent{border-left:4px solid var(--phys);}
+.card.ok-accent{border-left:4px solid var(--ok);}
+.card.warn-accent{border-left:4px solid var(--gold);}
+
+/* SECTION HEADER */
+.sec-hd{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:4px;color:var(--text);}
+.sec-sub{color:var(--muted);font-size:13px;line-height:1.55;margin-bottom:16px;}
+.chip{display:inline-block;padding:3px 11px;border-radius:12px;font-size:11px;font-weight:800;font-family:'Syne',sans-serif;}
+.chip-phys{background:var(--phys-bg);color:var(--phys);border:1px solid var(--phys-bd);}
+.chip-gold{background:var(--warn-bg);color:var(--warn);border:1px solid var(--warn-bd);}
+
+/* PHYSICIST BIO */
+.bio-card{background:linear-gradient(135deg,#EBF4FD 0%,#F3E8FF 100%);border:2px solid var(--phys-bd);border-radius:14px;padding:20px 22px;margin-bottom:16px;display:flex;gap:18px;align-items:flex-start;}
+.bio-portrait{font-size:52px;flex-shrink:0;}
+.bio-name{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--phys);margin-bottom:2px;}
+.bio-years{font-size:12px;color:var(--muted);font-weight:600;margin-bottom:8px;}
+.bio-text{font-size:13px;color:var(--text);line-height:1.65;}
+.bio-quote{font-style:italic;color:var(--phys);font-size:13px;border-left:3px solid var(--phys);padding-left:10px;margin-top:8px;}
+
+/* CONCEPT CARDS */
+.concept-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-bottom:12px;}
+.concept-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:var(--phys);margin-bottom:6px;display:flex;align-items:center;gap:8px;}
+.concept-body{font-size:14px;line-height:1.65;color:var(--text);}
+.formula{background:var(--phys-bg);border:1px solid var(--phys-bd);border-radius:8px;padding:10px 14px;font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--phys);text-align:center;margin:8px 0;letter-spacing:1px;}
+.formula-explain{font-size:12px;color:var(--muted);text-align:center;margin-top:4px;}
+
+/* PRACTICE / QUIZ QUESTIONS */
+.q-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px 24px;margin-bottom:14px;}
+.q-meta{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+.q-txt{font-size:17px;font-weight:600;line-height:1.45;color:var(--text);margin-bottom:16px;}
+.q-img{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;font-size:13px;color:var(--muted);margin-bottom:12px;}
+
+/* OPTIONS */
+.options{display:flex;flex-direction:column;gap:8px;}
+.opt{background:var(--surface);border:2px solid var(--border);border-radius:10px;padding:12px 16px;cursor:pointer;font-size:14px;transition:all 0.12s;text-align:left;color:var(--text);font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:10px;}
+.opt-letter{width:26px;height:26px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:11px;font-weight:800;background:var(--bg);border:1.5px solid var(--bs);color:var(--muted);transition:all 0.12s;}
+.opt:hover:not(.locked){border-color:var(--phys);background:var(--phys-bg);}
+.opt:hover:not(.locked) .opt-letter{background:var(--phys);color:#fff;border-color:var(--phys);}
+.opt.correct{border-color:var(--ok);background:var(--ok-bg);}
+.opt.correct .opt-letter{background:var(--ok);color:#fff;border-color:var(--ok);}
+.opt.wrong{border-color:var(--err);background:var(--err-bg);}
+.opt.wrong .opt-letter{background:var(--err);color:#fff;border-color:var(--err);}
+.opt.show-correct{border-color:var(--ok);background:var(--ok-bg);opacity:0.7;}
+.opt.show-correct .opt-letter{background:var(--ok);color:#fff;border-color:var(--ok);}
+.opt.locked{pointer-events:none;}
+
+/* NUMERIC INPUT */
+.num-wrap{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.num-in{background:var(--bg);border:2px solid var(--bs);border-radius:8px;padding:10px 13px;font-size:17px;font-family:'Syne',sans-serif;font-weight:700;width:140px;text-align:right;color:var(--text);}
+.num-in:focus{outline:none;border-color:var(--phys);background:var(--phys-bg);}
+
+/* FEEDBACK */
+.fb{padding:13px 16px;border-radius:10px;margin-top:12px;font-size:14px;font-weight:500;line-height:1.55;}
+.fb.ok{background:var(--ok-bg);color:#0E5C30;border:1px solid var(--ok-bd);}
+.fb.err{background:var(--err-bg);color:#9B2010;border:1px solid var(--err-bd);}
+.fb.socratic{background:var(--accent-bg);border:2px dashed var(--accent);color:var(--accent);border-radius:10px;padding:14px 16px;margin-top:10px;}
+.fb strong{font-weight:700;display:block;margin-bottom:2px;}
+.fb .hint-q{font-style:italic;margin-top:6px;font-size:13px;}
+
+/* XP REWARD BURST */
+.xp-burst{display:inline-block;background:var(--gold);color:#fff;font-family:'Syne',sans-serif;font-size:13px;font-weight:800;padding:4px 12px;border-radius:20px;margin-left:8px;animation:pop 0.4s ease;}
+@keyframes pop{0%{transform:scale(0.5);opacity:0;}70%{transform:scale(1.2);}100%{transform:scale(1);opacity:1;}}
+
+/* RANK UP SCREEN */
+.rank-up{text-align:center;padding:32px 16px;}
+.rank-up-icon{font-size:64px;margin-bottom:12px;animation:spin 0.6s ease;}
+@keyframes spin{from{transform:rotateY(0)}to{transform:rotateY(360deg)}}
+.rank-up-title{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--phys);}
+.rank-up-sub{color:var(--muted);font-size:15px;margin-top:6px;}
+.rank-stars{font-size:28px;letter-spacing:4px;margin:10px 0;}
+
+/* PROGRESS TABS */
+.moment-tabs{display:flex;gap:4px;margin-bottom:18px;overflow-x:auto;padding-bottom:4px;}
+.mt{padding:8px 13px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;font-family:'Syne',sans-serif;color:var(--muted);border:1.5px solid var(--border);background:var(--surface);white-space:nowrap;transition:all 0.15s;flex-shrink:0;}
+.mt.active{background:var(--phys);color:#fff;border-color:var(--phys);}
+.mt.done{background:var(--ok-bg);color:var(--ok);border-color:var(--ok-bd);}
+.mt.locked{opacity:0.4;cursor:not-allowed;}
+
+/* PROGRESS BAR */
+.prog-wrap{display:flex;align-items:center;gap:9px;margin-bottom:12px;}
+.prog-track{flex:1;background:var(--border);border-radius:5px;height:7px;}
+.prog-fill{height:7px;border-radius:5px;background:var(--phys);transition:width 0.4s;}
+.prog-lbl{font-size:12px;color:var(--muted);font-weight:600;white-space:nowrap;}
+
+/* BUTTONS */
+.btn{background:var(--phys);color:#fff;border:none;border-radius:9px;padding:12px 22px;font-family:'Syne',sans-serif;font-size:14px;font-weight:800;cursor:pointer;transition:all 0.15s;}
+.btn:hover{filter:brightness(1.1);transform:translateY(-1px);}
+.btn:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
+.btn-full{width:100%;margin-top:12px;padding:14px;}
+.btn-ok{background:var(--ok);}
+.btn-sec{background:var(--surface);border:2px solid var(--bs);color:var(--text);}
+.btn-sec:hover{border-color:var(--phys);color:var(--phys);}
+.btn-gold{background:var(--gold);}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+
+/* TEST RESULT */
+.score-c{width:88px;height:88px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 12px;}
+.score-c.pass{background:var(--ok-bg);border:5px solid var(--ok);}
+.score-c.fail{background:var(--err-bg);border:5px solid var(--err);}
+.score-pct{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;}
+.score-c.pass .score-pct{color:var(--ok);}
+.score-c.fail .score-pct{color:var(--err);}
+
+/* QUIZ REVIEW */
+.review-row{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);align-items:flex-start;}
+.review-row:last-child{border-bottom:none;}
+.review-icon{font-size:18px;flex-shrink:0;margin-top:2px;}
+.sbadge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:800;font-family:'Syne',sans-serif;}
+.sb-ok{background:var(--ok-bg);color:var(--ok);}
+.sb-err{background:var(--err-bg);color:var(--err);}
+
+/* INTRO SCREEN */
+.intro-hero{text-align:center;padding:36px 16px 24px;}
+.intro-hero h1{font-size:clamp(30px,6vw,48px);font-weight:800;letter-spacing:-1.5px;line-height:1.1;}
+.intro-hero h1 span{color:var(--phys);}
+.intro-sub{color:var(--muted);font-size:16px;margin:10px auto 24px;max-width:480px;line-height:1.6;}
+.moment-preview{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:16px 0;}
+.mp-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:13px 15px;text-align:left;}
+.mp-num{font-family:'Syne',sans-serif;font-size:11px;font-weight:800;color:var(--phys);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;}
+.mp-title{font-weight:700;font-size:14px;color:var(--text);}
+.mp-phys{font-size:12px;color:var(--muted);}
+
+/* DIVIDER */
+.divider{border:none;border-top:1px solid var(--border);margin:16px 0;}
+
+/* PRINT */
+@media print{#header{display:none!important;}}
+@media(max-width:500px){.moment-preview{grid-template-columns:1fr;}.bio-card{flex-direction:column;}}
+</style>
+</head>
+<body>
+
+<div id="header">
+  <div class="logo">FYS<span>IKERN</span></div>
+  <div class="rank-pill">
+    <div class="rank-icon" id="rankIcon">🔭</div>
+    <div>
+      <div class="rank-label" id="rankLabel">Nybörjare</div>
+      <div class="xp-bar-wrap">
+        <div class="xp-track"><div class="xp-fill" id="xpFill" style="width:0%"></div></div>
+        <div class="xp-label" id="xpLabel">0 XP</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="app"></div>
+
+<script>
+// ============================================================
+// RANKS
+// ============================================================
+const RANKS = [
+  { min:0,    icon:'🔭', label:'Nybörjare',  next:150  },
+  { min:150,  icon:'📐', label:'Lärlingen',  next:350  },
+  { min:350,  icon:'⚗️',  label:'Studenten',  next:650  },
+  { min:650,  icon:'🔬', label:'Kandidaten', next:1050 },
+  { min:1050, icon:'📊', label:'Licentiaten',next:1550 },
+  { min:1550, icon:'🎓', label:'Doktorn',    next:2200 },
+  { min:2200, icon:'⚡', label:'Fysikern',   next:9999 },
+];
+function getRank(xp) { return [...RANKS].reverse().find(r => xp >= r.min) || RANKS[0]; }
+
+// ============================================================
+// GAME DATA — 6 MOMENTS
+// ============================================================
+const MOMENTS = [
+{
+  id: 1,
+  title: "Kinematik",
+  subtitle: "Rörelse, hastighet och acceleration",
+  icon: "🏃",
+  color: "#0D4F8C",
+  physicist: {
+    name: "Galileo Galilei",
+    years: "1564–1642",
+    portrait: "🌟",
+    text: "Galileo Galilei föddes i Pisa, Italien och revolutionerade vår syn på rörelse. Han var bland de första att använda experiment och matematik för att studera naturen — istället för att bara spekulera filosofiskt. Hans berömda experiment på det lutande tornet i Pisa (troligen en legend, men principen stämmer) visade att föremål med olika massa faller lika snabbt. Han uppfann ett tidigt teleskop och stödde Kopernikus heliocentriska världsbild — vilket ledde till att han dömdes av kyrkan till husarrest. Galileo lade grunden för hela den klassiska mekaniken som Newton sedan fullbordade.",
+    quote: "Du kan inte lära någon något; du kan bara hjälpa dem att finna det inom sig själva."
+  },
+  concepts: [
+    {
+      title: "📍 Hastighet",
+      icon: "📍",
+      body: "Hastighet är hur snabbt ett föremål rör sig — avstånd per tidsenhet. Medelhastighet beräknas som total sträcka delat på total tid.",
+      formula: "v = s / t",
+      formulaExplain: "v = hastighet (m/s)  ·  s = sträcka (m)  ·  t = tid (s)"
+    },
+    {
+      title: "⚡ Acceleration",
+      icon: "⚡",
+      body: "Acceleration beskriver hur snabbt hastigheten förändras. Positiv acceleration = ökar hastighet. Negativ acceleration (retardation) = minskar hastighet. Jordens tyngdacceleration g ≈ 9,8 m/s².",
+      formula: "a = Δv / t = (v − v₀) / t",
+      formulaExplain: "a = acceleration (m/s²)  ·  Δv = hastighetsförändring  ·  t = tid (s)"
+    },
+    {
+      title: "📏 Rörelseformlerna",
+      icon: "📏",
+      body: "För jämnt accelererad rörelse (konstant acceleration) gäller tre grundformler. Den viktigaste är den som kopplar sträcka, begynnelsehastighet, acceleration och tid.",
+      formula: "s = v₀·t + ½·a·t²",
+      formulaExplain: "Gäller för konstant acceleration. Om v₀=0: s = ½·a·t²"
+    }
+  ],
+  practice: [
+    {
+      id: "k1", type: "mc",
+      q: "En cyklist rör sig 60 meter på 12 sekunder. Vad är cyklist ens medelhastighet?",
+      opts: ["A) 3 m/s", "B) 5 m/s", "C) 720 m/s", "D) 0,2 m/s"],
+      correct: "B",
+      explain: "v = s/t = 60/12 = 5 m/s. Enkel division — sträcka delat på tid.",
+      socratic: "Vilken formel kopplar ihop sträcka, hastighet och tid? Om du vet s och t — vad löser du ut?",
+      praise: "Precis rätt! v = s/t är grundstenen i all kinematik."
+    },
+    {
+      id: "k2", type: "mc",
+      q: "En boll accelererar från stillastående (v₀ = 0) med a = 2 m/s². Hur lång sträcka har den rullat efter 4 sekunder?",
+      opts: ["A) 8 m", "B) 16 m", "C) 32 m", "D) 4 m"],
+      correct: "B",
+      explain: "s = ½·a·t² = ½·2·4² = ½·2·16 = 16 m. Kom ihåg: t² — kvadrera tiden!",
+      socratic: "Vilken formel gäller när v₀=0 och accelerationen är konstant? Vad händer med sträckan om du fördubblar tiden?",
+      praise: "Utmärkt! ½·a·t² sitter nu. Notera: om t fördubblas → s ökar fyra gånger (t²)."
+    },
+    {
+      id: "k3", type: "mc",
+      q: "En bil ökar sin hastighet från 20 m/s till 30 m/s på 5 sekunder. Vad är accelerationen?",
+      opts: ["A) 1 m/s²", "B) 6 m/s²", "C) 2 m/s²", "D) 10 m/s²"],
+      correct: "C",
+      explain: "a = (v−v₀)/t = (30−20)/5 = 10/5 = 2 m/s². Hastighetsförändringen delat på tid.",
+      socratic: "Vad menas med 'förändring i hastighet'? Hur beräknar du en förändring (Δ)?",
+      praise: "Korrekt! Δv = 10 m/s, t = 5 s → a = 2 m/s². Du tänker som Galileo!"
+    },
+    {
+      id: "k4", type: "mc",
+      q: "Galileo visade experimentellt att alla föremål faller lika snabbt (i vakuum). Vilken kraft är ansvarig för att föremål faller mot marken?",
+      opts: ["A) Magnetkraft", "B) Tyngdkraft (gravitation)", "C) Friktionskraft", "D) Elektrisk kraft"],
+      correct: "B",
+      explain: "Tyngdkraften (gravitationen) drar alla föremål mot jordens centrum med g ≈ 9,8 m/s². I vakuum, utan luftmotstånd, faller en fjäder och ett stenblock exakt lika snabbt.",
+      socratic: "Vad observerade Galileo när han tappade föremål av olika massa? Vad beror skillnaden i fallhastighet i luft egentligen på?",
+      praise: "Rätt! Tyngdkraften ger alla föremål samma acceleration g ≈ 9,8 m/s² — oberoende av massa."
+    }
+  ],
+  quiz: [
+    { id:"kq1", q:"Enhet för hastighet är:", opts:["A) m/s²","B) kg·m","C) m/s","D) N"], correct:"C", explain:"Hastighet = sträcka/tid = meter/sekund = m/s. m/s² är enheten för acceleration." },
+    { id:"kq2", q:"v = 0, a = 10 m/s², t = 3 s. Vilken sträcka har föremålet rört sig?", opts:["A) 30 m","B) 15 m","C) 45 m","D) 90 m"], correct:"C", explain:"s = ½·a·t² = ½·10·9 = 45 m." },
+    { id:"kq3", q:"Vad menas med retardation?", opts:["A) Konstant hastighet","B) Negativ acceleration — hastigheten minskar","C) Rörelse bakåt","D) Noll hastighet"], correct:"B", explain:"Retardation = negativ acceleration. Hastigheten minskar men riktningen kan vara positiv." },
+    { id:"kq4", q:"En bil kör 100 km på 2 timmar. Medelhastigheten är:", opts:["A) 200 km/h","B) 50 km/h","C) 100 km/h","D) 150 km/h"], correct:"B", explain:"v = s/t = 100/2 = 50 km/h." },
+    { id:"kq5", q:"Jordens tyngdacceleration g är ungefär:", opts:["A) 9,8 m/s","B) 9,8 m/s²","C) 9,8 N","D) 9,8 kg"], correct:"B", explain:"g ≈ 9,8 m/s² — acceleration (meter per sekund i kvadrat), inte hastighet." },
+  ],
+  test: [
+    { id:"kt1", q:"En löpare accelererar från 0 till 8 m/s på 4 s. Beräkna accelerationen.", opts:["A) 32 m/s²","B) 4 m/s²","C) 2 m/s²","D) 0,5 m/s²"], correct:"C", explain:"a = Δv/t = 8/4 = 2 m/s²." },
+    { id:"kt2", q:"Vilket påstående om fritt fall (vakuum) är korrekt?", opts:["A) Tyngre föremål faller snabbare","B) Alla föremål faller med samma acceleration g","C) Acceleration beror på form","D) Föremål faller med konstant hastighet"], correct:"B", explain:"Galileos insikt: i vakuum faller alla föremål med g ≈ 9,8 m/s², oberoende av massa." },
+    { id:"kt3", q:"Formeln s = v₀t + ½at² används för:", opts:["A) Konstant hastighet","B) Jämnt accelererad rörelse","C) Cirkulär rörelse","D) Slumpmässig rörelse"], correct:"B", explain:"Formeln gäller för jämnt accelererad rörelse — konstant acceleration." },
+    { id:"kt4", q:"En sten faller från ett torn. Efter 3 s, vilken hastighet har stenen? (g=10 m/s², v₀=0)", opts:["A) 10 m/s","B) 30 m/s","C) 90 m/s","D) 15 m/s"], correct:"B", explain:"v = v₀ + at = 0 + 10·3 = 30 m/s." },
+    { id:"kt5", q:"Vad är korrekt enhet för acceleration?", opts:["A) m/s","B) km/h","C) m/s²","D) N/kg"], correct:"C", explain:"Acceleration = hastighetsförändring/tid = (m/s)/s = m/s²." },
+  ]
+},
+{
+  id: 2,
+  title: "Newtons lagar",
+  subtitle: "Kraft, massa och rörelse",
+  icon: "⚙️",
+  color: "#C0392B",
+  physicist: {
+    name: "Isaac Newton",
+    years: "1643–1727",
+    portrait: "🍎",
+    text: "Isaac Newton, född i Woolsthorpe i England, är en av historiens mest inflytelserika vetenskapsmän. Enligt legenden inspirerades han av ett äpple som föll från ett träd — och undrade varför det föll rakt ner och inte snett. Under pestepidemin 1665–1666, när Cambridge universitet stängdes, tillbringade Newton hemma och formulerade sina tre rörelselagar, gravitationslagen och uppfann differentialkalkyl. Hans verk Principia Mathematica (1687) anses vara ett av vetenskapens viktigaste verk. Newton sammanfattade rörelse och kraft i tre enkla lagar som fortfarande gäller i vardagslivet.",
+    quote: "Om jag har sett längre än andra, så är det för att jag stod på jättars axlar."
+  },
+  concepts: [
+    {
+      title: "1️⃣ Newtons 1:a lag — Tröghetsprincipen",
+      body: "Ett föremål i vila förblir i vila, och ett föremål i rörelse fortsätter i samma riktning med samma hastighet — om ingen yttre kraft verkar på det. Detta kallas tröghet (inertia). Trögheten beror på massan — mer massa = mer tröghet.",
+      formula: "ΣF = 0  ⟹  a = 0",
+      formulaExplain: "Summan av alla krafter = 0 → acceleration = 0 (vila eller konstant hastighet)"
+    },
+    {
+      title: "2️⃣ Newtons 2:a lag — Rörelsemängd",
+      body: "Nettokraften på ett föremål är proportionell mot dess acceleration. Dubbleras kraften → dubbleras accelerationen. Dubbleras massan → halveras accelerationen. Detta är den mest använda lagen i mekaniken.",
+      formula: "F = m · a",
+      formulaExplain: "F = kraft (N)  ·  m = massa (kg)  ·  a = acceleration (m/s²)   [ 1 N = 1 kg·m/s² ]"
+    },
+    {
+      title: "3️⃣ Newtons 3:e lag — Kraft och motkraft",
+      body: "Varje kraft har en lika stor motriktad motkraft. Om du trycker mot en vägg trycker väggen lika hårt tillbaka. Kraftparen verkar alltid på OLIKA föremål.",
+      formula: "F₁₂ = −F₂₁",
+      formulaExplain: "Kraften som kropp 1 utövar på kropp 2 är lika stor men motriktad kraften som 2 utövar på 1"
+    }
+  ],
+  practice: [
+    {
+      id: "n1", type: "mc",
+      q: "En kraft på 12 N verkar på ett föremål med massan 4 kg. Vad är accelerationen?",
+      opts: ["A) 48 m/s²", "B) 3 m/s²", "C) 0,33 m/s²", "D) 8 m/s²"],
+      correct: "B",
+      explain: "F = m·a → a = F/m = 12/4 = 3 m/s².",
+      socratic: "Vilken lag kopplar kraft, massa och acceleration? Om du känner till F och m — vad behöver du göra med formeln?",
+      praise: "Perfekt! F=ma är Newtons 2:a lag. Här: a = F/m = 12/4 = 3 m/s²."
+    },
+    {
+      id: "n2", type: "mc",
+      q: "En bil med massan 1 500 kg ska bromsas in med kraften 6 000 N. Hur stor är retardationen (bromsinbromsacceleration)?",
+      opts: ["A) 4 m/s²", "B) 2 m/s²", "C) 9 000 000 m/s²", "D) 0,25 m/s²"],
+      correct: "A",
+      explain: "a = F/m = 6000/1500 = 4 m/s². Bromsning = negativ acceleration = retardation.",
+      socratic: "Vilka storheter är givna? F och m. Vad löser du ut ur F=ma? Tänk på att enheten för kraft är Newton (N).",
+      praise: "Korrekt! 6000/1500 = 4 m/s². Bra att du ser att bromsning = negativ a."
+    },
+    {
+      id: "n3", type: "mc",
+      q: "Vilken av Newtons lagar förklarar varför du lutar framåt när bussen bromsar?",
+      opts: ["A) 1:a lagen — du vill fortsätta röra dig framåt (tröghet)", "B) 2:a lagen — kraften är proportionell mot massan", "C) 3:e lagen — bussen trycker på dig", "D) Gravitationslagen"],
+      correct: "A",
+      explain: "1:a lagen: ditt kropp vill fortsätta röra sig med bussens gamla hastighet när bussen bromsas. Det är tröghet — du 'faller' framåt relativt bussen.",
+      socratic: "Vad försöker din kropp göra när bussen plötsligt saktar? Vilket tillstånd 'föredrar' föremål enligt Newtons 1:a lag?",
+      praise: "Rätt! Tröghetsprincipen i praktiken — din kropp vill hålla kvar sin rörelse."
+    },
+    {
+      id: "n4", type: "mc",
+      q: "Du trycker på en skateboard med 50 N. Med vilken kraft trycker skateboarden tillbaka på dig?",
+      opts: ["A) 0 N — den trycker inte tillbaka", "B) 25 N", "C) 50 N, men i motsatt riktning", "D) 100 N"],
+      correct: "C",
+      explain: "Newtons 3:e lag: kraftpar — lika stora, motriktade. 50 N → 50 N tillbaka.",
+      socratic: "Vad säger Newtons 3:e lag om ett kraftpar? Handlingen och reaktionen — hur förhåller de sig till varandra?",
+      praise: "Precis! Varje kraft har en exakt lika stor motkraft. Det är Newtons 3:e lag."
+    }
+  ],
+  quiz: [
+    { id:"nq1", q:"Enheten för kraft är:", opts:["A) kg","B) m/s²","C) N (Newton)","D) J"], correct:"C", explain:"1 N = 1 kg·m/s². Newton är enheten för kraft, uppkallad efter Isaac Newton." },
+    { id:"nq2", q:"F = 20 N, m = 5 kg. Vad är accelerationen?", opts:["A) 100 m/s²","B) 0,25 m/s²","C) 4 m/s²","D) 25 m/s²"], correct:"C", explain:"a = F/m = 20/5 = 4 m/s²." },
+    { id:"nq3", q:"Ett föremål rör sig med konstant hastighet. Vilket påstående stämmer?", opts:["A) Nettokraften är stor","B) Nettokraften är noll","C) Massan är noll","D) Accelerationen är positiv"], correct:"B", explain:"Konstanthastighet → a=0 → ΣF=0 (Newtons 1:a lag). Krafterna balanserar varandra." },
+    { id:"nq4", q:"En raket skjuter ut gas bakåt. Varför rör sig raketen framåt?", opts:["A) 1:a lagen — tröghet","B) 2:a lagen — F=ma","C) 3:e lagen — motkraft","D) Gravitationslagen"], correct:"C", explain:"3:e lagen: gasen skjuts ut bakåt, och raketen får en lika stor kraft framåt." },
+    { id:"nq5", q:"Tyngdkraften (vikten) på ett föremål med m = 10 kg är: (g=10 m/s²)", opts:["A) 1 N","B) 100 N","C) 10 kg","D) 10 N"], correct:"B", explain:"F_tyngd = m·g = 10·10 = 100 N. Notera: vikt mäts i Newton, inte kg." },
+  ],
+  test: [
+    { id:"nt1", q:"En kraft på 30 N ger ett föremål accelerationen 6 m/s². Vad är massan?", opts:["A) 180 kg","B) 24 kg","C) 5 kg","D) 0,2 kg"], correct:"C", explain:"m = F/a = 30/6 = 5 kg." },
+    { id:"nt2", q:"En astronaut väger 800 N på jorden (g=10). Vad är hennes massa?", opts:["A) 800 kg","B) 8 000 kg","C) 80 kg","D) 8 kg"], correct:"C", explain:"m = F/g = 800/10 = 80 kg. Massa är konstant, vikt ändras med g." },
+    { id:"nt3", q:"Friktionskraft 300 N bromsas ett fordon med m=600 kg. Retardationen är:", opts:["A) 0,5 m/s²","B) 2 m/s²","C) 180 000 m/s²","D) 300 m/s²"], correct:"A", explain:"a = F/m = 300/600 = 0,5 m/s²." },
+    { id:"nt4", q:"Newtons 1:a lag gäller när:", opts:["A) Nettokraft ≠ 0","B) Nettokraft = 0","C) Massan är stor","D) Hastigheten är noll"], correct:"B", explain:"1:a lagen: ΣF=0 → konstant hastighet (eller vila). Inget krav på att v=0." },
+    { id:"nt5", q:"Om massan fördubblas och kraften är konstant, vad händer med accelerationen?", opts:["A) Fördubblas","B) Halveras","C) Oförändrad","D) Fyradubblas"], correct:"B", explain:"F=ma → a=F/m. Om m×2 och F konstant → a÷2. Inversely proportional." },
+  ]
+},
+{
+  id: 3,
+  title: "Energi och arbete",
+  subtitle: "Rörelsesenergi, lägesenergi och energibevarrandelagen",
+  icon: "⚡",
+  color: "#1A7A4A",
+  physicist: {
+    name: "James Prescott Joule",
+    years: "1818–1889",
+    portrait: "🔋",
+    text: "James Prescott Joule var en brittisk bryggarson från Manchester som aldrig fick formell universitetsutbildning — men som ändå lade grunden för termodynamiken. Hans noggranna experiment visade att mekaniskt arbete och värme är olika former av samma sak: energi. Det berömtaste var paddel-experimentet där han roterade paddlar i vatten med vikter och mätte temperaturökningen. Mot tidens vetenskapliga etablissemang insisterade han på energins bevarrandelag. SI-enheten för energi bär hans namn: Joule (J). En Joule är arbetet som utförs när en Newton kraft förflyttar ett föremål en meter.",
+    quote: "Naturen är aldrig slösaktig, och inget arbete utfört av hennes lagar går till spillo."
+  },
+  concepts: [
+    {
+      title: "🔧 Mekaniskt arbete",
+      body: "Arbete utförs när en kraft förflyttar ett föremål. Om kraften är parallell med rörelseriktningen är W = F·s. Enheten är Joule (J). Notera: om du håller en tung bok stilla utförs INGET arbete — kroppen måste förflytta sig.",
+      formula: "W = F · s",
+      formulaExplain: "W = arbete (J)  ·  F = kraft (N)  ·  s = förflyttning (m)"
+    },
+    {
+      title: "🏃 Rörelseenergi (kinetisk energi)",
+      body: "All rörelse bär på energi. Rörelseenergin beror på massan och kvadraten på hastigheten. Dubbleras hastigheten → fyradubblas rörelseenergin!",
+      formula: "Eₖ = ½ · m · v²",
+      formulaExplain: "Eₖ = rörelseenergi (J)  ·  m = massa (kg)  ·  v = hastighet (m/s)"
+    },
+    {
+      title: "⛰️ Lägesenergi (potentiell energi) & Bevarandelagen",
+      body: "Föremål på hög höjd har lagrad energi (lägesenergi). När de faller omvandlas lägesenergi till rörelseenergi. Energibevarandelagen: i ett slutet system är den totala energin konstant — energi kan omvandlas men inte skapas eller förstöras.",
+      formula: "Eₚ = m · g · h  |  Eₖ + Eₚ = konstant",
+      formulaExplain: "g ≈ 9,8 m/s² (10 m/s²)  ·  h = höjd (m)"
+    }
+  ],
+  practice: [
+    {
+      id: "e1", type: "mc",
+      q: "En kraft på 40 N förflyttar en låda 5 meter. Hur stort är det utförda arbetet?",
+      opts: ["A) 8 J", "B) 200 J", "C) 45 J", "D) 200 N"],
+      correct: "B",
+      explain: "W = F·s = 40·5 = 200 J.",
+      socratic: "Vilken formel kopplar kraft, förflyttning och arbete? Vad är enheten för arbete?",
+      praise: "Rätt! W = F·s = 200 J. En Joule = en Newton gånger en meter."
+    },
+    {
+      id: "e2", type: "mc",
+      q: "En bil med massan 1 000 kg kör med 20 m/s. Vad är bilens rörelseenergi?",
+      opts: ["A) 20 000 J", "B) 200 000 J", "C) 400 000 J", "D) 10 000 J"],
+      correct: "B",
+      explain: "Eₖ = ½·m·v² = ½·1000·400 = 200 000 J = 200 kJ.",
+      socratic: "Vad är formeln för rörelseenergi? Var noga med att kvadrera hastigheten — vad är 20²?",
+      praise: "Perfekt! ½·1000·400 = 200 000 J. Kom ihåg: v² gör att hastigheten har stort inflytande."
+    },
+    {
+      id: "e3", type: "mc",
+      q: "En sten med massan 2 kg hålls på 10 meters höjd. Vad är lägesenergin? (g = 10 m/s²)",
+      opts: ["A) 20 J", "B) 200 J", "C) 2 000 J", "D) 0,2 J"],
+      correct: "B",
+      explain: "Eₚ = m·g·h = 2·10·10 = 200 J.",
+      socratic: "Vilka tre storheter ingår i formeln för lägesenergi? Vad är g och vad mäter h?",
+      praise: "Korrekt! Eₚ = mgh = 200 J. Den energin omvandlas till rörelseenergi när stenen faller."
+    },
+    {
+      id: "e4", type: "mc",
+      q: "En boll rullar ned för en sluttning utan friktion. Vad händer med den totala mekaniska energin?",
+      opts: ["A) Den ökar — bollen rör sig snabbare", "B) Den minskar — energi förbrukas", "C) Den bevaras — lägesenergi omvandlas till rörelseenergi", "D) Lägesenergin ökar"],
+      correct: "C",
+      explain: "Energibevarandelagen: Eₚ + Eₖ = konstant. Utan friktion omvandlas lägesenergi exakt till rörelseenergi.",
+      socratic: "Vad säger energibevarandelagen om total energi? Vad händer med höjden h och hastigheten v när bollen rullar ned?",
+      praise: "Utmärkt fysikertänk! Energin bevaras — den byter bara form."
+    }
+  ],
+  quiz: [
+    { id:"eq1", q:"Enheten för energi och arbete är:", opts:["A) Newton","B) Watt","C) Joule","D) Pascal"], correct:"C", explain:"J = Joule = N·m. Uppkallad efter James Prescott Joule." },
+    { id:"eq2", q:"Eₖ = ½·m·v². Om hastigheten tredubblas, hur ändras rörelseenergin?", opts:["A) Tredubblas","B) Sexdubblas","C) Nidubblas","D) Oförändrad"], correct:"C", explain:"Eₖ ∝ v². Om v×3 → Eₖ×3² = ×9. Kvadratförhållande!" },
+    { id:"eq3", q:"W = F·s. F = 0 N, s = 100 m. Arbetet W =", opts:["A) 100 J","B) 0 J","C) oändligt","D) 1 J"], correct:"B", explain:"W = 0·100 = 0 J. Ingen kraft → inget arbete, oavsett hur lång sträckan är." },
+    { id:"eq4", q:"Eₚ = mgh. m=5kg, g=10, h=4m. Eₚ =", opts:["A) 200 J","B) 50 J","C) 2 J","D) 19 J"], correct:"A", explain:"Eₚ = 5·10·4 = 200 J." },
+    { id:"eq5", q:"Energibevarandelagen säger att energi:", opts:["A) Kan skapas av motorer","B) Förstörs av friktion","C) Varken skapas eller förstörs — bara omvandlas","D) Ökar med hastigheten"], correct:"C", explain:"Energi kan omvandlas (t.ex. rörelseenergi→värme) men summan är alltid konstant i ett slutet system." },
+  ],
+  test: [
+    { id:"et1", q:"En kran lyfter 500 kg gods 8 m högt. Hur stort arbete utförs? (g=10)", opts:["A) 4 000 J","B) 40 000 J","C) 400 000 J","D) 508 J"], correct:"B", explain:"W = F·s = mgs = 500·10·8 = 40 000 J." },
+    { id:"et2", q:"Eₖ = 8 000 J, m = 4 kg. Vad är hastigheten?", opts:["A) 2 000 m/s","B) 63,2 m/s","C) 2 m/s","D) 4 000 m/s"], correct:"B", explain:"v = √(2Eₖ/m) = √(16000/4) = √4000 ≈ 63,2 m/s." },
+    { id:"et3", q:"En sten faller fritt från 20 m höjd. Vad är hastigheten strax innan den träffar marken? (g=10, energibevarings)", opts:["A) 200 m/s","B) 20 m/s","C) 10 m/s","D) 400 m/s"], correct:"B", explain:"mgh = ½mv² → v = √(2gh) = √(2·10·20) = √400 = 20 m/s." },
+    { id:"et4", q:"Effekt P = W/t. 1200 J utförs på 4 s. P =", opts:["A) 4800 W","B) 300 W","C) 1204 W","D) 0,003 W"], correct:"B", explain:"P = W/t = 1200/4 = 300 W. Enheten Watt = J/s." },
+    { id:"et5", q:"Varför bromsar friktionen ned en rullande boll?", opts:["A) Friktion skapar energi","B) Friktionen omvandlar rörelseenergi till värme","C) Friktionen ökar massan","D) Friktionen ökar hastigheten"], correct:"B", explain:"Friktion omvandlar mekanisk energi till värme — ett icke-reversibelt energibyte." },
+  ]
+},
+{
+  id: 4,
+  title: "Elektricitet",
+  subtitle: "Laddning, spänning, ström och resistans",
+  icon: "🔌",
+  color: "#D97706",
+  physicist: {
+    name: "Georg Simon Ohm",
+    years: "1789–1854",
+    portrait: "⚡",
+    text: "Georg Simon Ohm var en tysk gymnasistelärare i matematik och fysik som på fritiden utförde noggranna experiment med elektriska kretsar. Med enkla material — trådar, batterier och galvanometrar — mätte han samband mellan spänning och ström i ledare. 1827 publicerade han sin lag: strömmen är proportionell mot spänningen och omvänt proportionell mot resistansen. Den vetenskapliga etablissemanget var skeptisk — en gymnasielärare som utmanar etablerade teorier. Ohm fick lämna sin tjänst och levde i fattigdom ett decennium. Så småningom erkändes hans insats och 1841 tilldelades han Royal Society's Copley Medal. SI-enheten för elektrisk resistans heter Ohm (Ω) till hans ära.",
+    quote: "Det är nödvändigt att inte misströsta om ett problem som länge motstår angrepp."
+  },
+  concepts: [
+    {
+      title: "🔋 Laddning, ström och spänning",
+      body: "Elektrisk laddning mäts i Coulomb (C). Elektrisk ström är laddningsflödet per sekund — ampere (A). Elektrisk spänning (spänningsskillnad) är den 'drivkraft' som driver strömmen — volt (V). Spänning utan sluten krets ger ingen ström.",
+      formula: "I = Q / t",
+      formulaExplain: "I = ström (A)  ·  Q = laddning (C)  ·  t = tid (s)"
+    },
+    {
+      title: "Ω Ohms lag",
+      body: "Ohms lag kopplar spänning (U), resistans (R) och ström (I). Resistans mäts i Ohm (Ω) och beror på materialets egenskaper, längd och area. Bra ledare = låg resistans (koppar). Isolatorer = extremt hög resistans.",
+      formula: "U = R · I",
+      formulaExplain: "U = spänning (V)  ·  R = resistans (Ω)  ·  I = ström (A)"
+    },
+    {
+      title: "⚡ Effekt och elektrisk energi",
+      body: "Elektrisk effekt P mäter hur snabbt energi omvandlas. En 100W lampa omvandlar 100 J per sekund till ljus och värme. Elektrisk energi W = P·t används för att beräkna elkostnader (kWh = 3 600 000 J).",
+      formula: "P = U · I = U²/R = I²·R",
+      formulaExplain: "P = effekt (W = J/s)  ·  Alla tre former är ekvivalenta via Ohms lag"
+    }
+  ],
+  practice: [
+    {
+      id: "el1", type: "mc",
+      q: "En lampa har resistansen 60 Ω och kopplas till 120 V. Vilken ström flödar genom lampan?",
+      opts: ["A) 7 200 A", "B) 2 A", "C) 0,5 A", "D) 60 A"],
+      correct: "B",
+      explain: "U = R·I → I = U/R = 120/60 = 2 A.",
+      socratic: "Vilken formel relaterar U, R och I? Vilken storhet söker du? Lös ut I ur Ohms lag.",
+      praise: "Korrekt! I = U/R = 120/60 = 2 A. Ohms lag i praktiken."
+    },
+    {
+      id: "el2", type: "mc",
+      q: "En ström på 3 A flödar genom en resistor med R = 20 Ω. Hur stor är spänningsfallet?",
+      opts: ["A) 6,7 V", "B) 60 V", "C) 23 V", "D) 0,15 V"],
+      correct: "B",
+      explain: "U = R·I = 20·3 = 60 V.",
+      socratic: "Ohms lag: U = R·I. Sätt in de kända storheterna. Vad är 20 × 3?",
+      praise: "Rätt! U = 20·3 = 60 V. Enkelt men fundamentalt."
+    },
+    {
+      id: "el3", type: "mc",
+      q: "En elektrisk spis drar 10 A vid 230 V. Hur stor är effekten?",
+      opts: ["A) 23 W", "B) 240 W", "C) 2 300 W", "D) 23 000 W"],
+      correct: "C",
+      explain: "P = U·I = 230·10 = 2 300 W = 2,3 kW.",
+      socratic: "Vilken formel ger effekt från spänning och ström? Vad är enheten för effekt?",
+      praise: "Perfekt! P = U·I = 2300 W = 2,3 kW. En typisk spis förbrukar 2–4 kW."
+    },
+    {
+      id: "el4", type: "mc",
+      q: "Vad händer med strömmen om resistansen fördubblas (spänningen konstant)?",
+      opts: ["A) Fördubblas", "B) Halveras", "C) Oförändrad", "D) Fyradubblas"],
+      correct: "B",
+      explain: "I = U/R. Om R×2 och U konstant → I = U/(2R) = halva ursprungliga strömmen.",
+      socratic: "Ohms lag: I = U/R. Vad händer med ett bråk om nämnaren fördubblas?",
+      praise: "Utmärkt resonemang! I och R är omvänt proportionella vid konstant U."
+    }
+  ],
+  quiz: [
+    { id:"elq1", q:"Enheten för elektrisk resistans är:", opts:["A) Volt","B) Ampere","C) Ohm (Ω)","D) Watt"], correct:"C", explain:"Ohm (Ω) är enheten för resistans, uppkallad efter Georg Simon Ohm." },
+    { id:"elq2", q:"U = 12 V, R = 4 Ω. I = ?", opts:["A) 48 A","B) 8 A","C) 3 A","D) 0,33 A"], correct:"C", explain:"I = U/R = 12/4 = 3 A." },
+    { id:"elq3", q:"P = U·I. U=220V, I=5A. P = ?", opts:["A) 44 W","B) 225 W","C) 1 100 W","D) 215 W"], correct:"C", explain:"P = 220·5 = 1 100 W = 1,1 kW." },
+    { id:"elq4", q:"Vilken koppling ger komponenter samma spänning?", opts:["A) Seriekoppling","B) Parallellkoppling","C) Kortslutning","D) Jordat"], correct:"B", explain:"Parallellkoppling: alla komponenter har samma spänning U. Seriekoppling: samma ström." },
+    { id:"elq5", q:"1 kWh (kilowattimme) i joule är:", opts:["A) 1 000 J","B) 3 600 J","C) 3 600 000 J","D) 1 000 000 J"], correct:"C", explain:"1 kWh = 1000 W × 3600 s = 3 600 000 J = 3,6 MJ." },
+  ],
+  test: [
+    { id:"elt1", q:"R = 8 Ω, I = 2,5 A. U = ?", opts:["A) 3,2 V","B) 10,5 V","C) 20 V","D) 5,5 V"], correct:"C", explain:"U = R·I = 8·2,5 = 20 V." },
+    { id:"elt2", q:"En lampa på 60 W lyser 5 timmar. Hur mycket energi (kWh) används?", opts:["A) 0,3 kWh","B) 300 kWh","C) 12 kWh","D) 65 kWh"], correct:"A", explain:"W = P·t = 60W · 5h = 300 Wh = 0,3 kWh." },
+    { id:"elt3", q:"U = 230 V, R = 46 Ω. Effekten P = ?", opts:["A) 276 W","B) 5 W","C) 1150 W","D) 10 580 W"], correct:"C", explain:"P = U²/R = 230²/46 = 52900/46 ≈ 1150 W." },
+    { id:"elt4", q:"Tre resistorer à 6 Ω i serie. Total resistans = ?", opts:["A) 2 Ω","B) 18 Ω","C) 6 Ω","D) 12 Ω"], correct:"B", explain:"Seriekoppling: Rtot = R1+R2+R3 = 6+6+6 = 18 Ω." },
+    { id:"elt5", q:"Varför är det farligt med hög ström genom kroppen?", opts:["A) Hög ström kyler ner kroppen","B) P=I²R → hög ström ger stor värmeutveckling i vävnad","C) Hög ström minskar spänningen","D) Strömmen tar slut"], correct:"B", explain:"P = I²·R. Kroppen har resistans, och hög ström ger stor värmeutveckling — cellskador." },
+  ]
+},
+{
+  id: 5,
+  title: "Elektromagnetism",
+  subtitle: "Magnetfält, induktion och elektromagnetiska fenomen",
+  icon: "🧲",
+  color: "#7C3AAE",
+  physicist: {
+    name: "Michael Faraday",
+    years: "1791–1867",
+    portrait: "🧲",
+    text: "Michael Faraday är kanske det bästa exemplet på att genialitet inte kräver privileger. Född som son till en smed i London, slutade han skolan vid 13 och arbetade som bokbindarlärling. Genom att läsa böcker han fick i uppdrag att binda väcktes hans intresse för vetenskap. Han skickade handskrivna anteckningar till Humphry Davy vid Royal Institution — och fick ett jobb som laboratorieassistent. Faraday uppfann den elektriska motorn, generatorn och transformatorn, och formulerade principen om elektromagnetisk induktion (1831): ett föränderligt magnetfält skapar elektrisk ström. Utan Faraday, inga elektricitetsverken, inga elmotorer. Maxwell formaliserade Faradays insikter matematiskt.",
+    quote: "Ingenting är för underbart för att vara sant, om det är förenligt med naturens lagar."
+  },
+  concepts: [
+    {
+      title: "🧲 Magnetfält och elektromagnet",
+      body: "Rörliga elektriska laddningar (=ström) skapar magnetfält. En strömförande spole beter sig som en magnet — detta kallas elektromagnet. Kraftigare ström eller fler varv = starkare magnetfält. Riktningen visas med höger-handsregeln.",
+      formula: "Riktning: Höger-handsregel",
+      formulaExplain: "Tumme i strömriktning → övriga fingrar visar magnetfältets cirkulärriktning"
+    },
+    {
+      title: "⚡ Faradays induktionslag",
+      body: "Ett föränderligt magnetfält inducerar en EMK (elektromotorisk kraft = spänning) i en ledare. Ju snabbare förändringen, desto större spänning. Detta är principen bakom alla generatorer och transformatorer.",
+      formula: "EMK = −N · ΔΦ/Δt",
+      formulaExplain: "N = antal varv  ·  ΔΦ = förändring i magnetflöde  ·  Δt = tid  ·  (– = Lenz lag)"
+    },
+    {
+      title: "🔄 Transformatorn",
+      body: "En transformator använder induktion för att höja eller sänka spänning. Den består av en primärlindning och en sekundärlindning på en järnkärna. Förhållandet mellan varv bestämmer spänningsförändringen. Effekten bevaras (idealt): P_in = P_ut.",
+      formula: "U₂/U₁ = N₂/N₁",
+      formulaExplain: "U₁, N₁ = primärsida  ·  U₂, N₂ = sekundärsida  ·  U₂·I₂ = U₁·I₁"
+    }
+  ],
+  practice: [
+    {
+      id: "em1", type: "mc",
+      q: "En transformator har 200 varv på primärsidan och 1 000 varv på sekundärsidan. Primärspänningen är 100 V. Vad är sekundärspänningen?",
+      opts: ["A) 20 V", "B) 500 V", "C) 200 V", "D) 1 000 V"],
+      correct: "B",
+      explain: "U₂/U₁ = N₂/N₁ → U₂ = U₁·(N₂/N₁) = 100·(1000/200) = 500 V.",
+      socratic: "Vad är förhållandet N₂/N₁? Vad gör det med spänningen? Mer varv → mer eller mindre spänning?",
+      praise: "Korrekt! N₂/N₁ = 5 → U₂ = 5×100 = 500 V. En uppåttransformator."
+    },
+    {
+      id: "em2", type: "mc",
+      q: "Vad krävs för att induktion ska ske i en ledare?",
+      opts: ["A) Konstant magnetfält", "B) Ett föränderligt magnetfält", "C) Hög temperatur", "D) Direkt kontakt med en magnet"],
+      correct: "B",
+      explain: "Faradays lag: induktion kräver ett FÖRÄNDERLIGT magnetfält. Konstant fält → ingen induktion.",
+      socratic: "Vad säger Faradays induktionslag? Tänk på vad 'ΔΦ/Δt' betyder — vad måste förändras?",
+      praise: "Rätt! ΔΦ/Δt — förändring av flöde per tid. Utan förändring, inget ΔΦ, ingen EMK."
+    },
+    {
+      id: "em3", type: "mc",
+      q: "En transformator stegar upp spänningen från 230 V till 23 000 V. Varför används höga spänningar i elnätet?",
+      opts: ["A) Hög spänning är farligare — bättre skyddat", "B) Vid hög U kan strömmen I vara liten vid samma effekt P=UI — detta minskar värmeförluster I²R", "C) Hög spänning minskar resistansen i ledningarna", "D) Det är ett historiskt misstag som aldrig rättats"],
+      correct: "B",
+      explain: "P = U·I. Samma effekt med hög U → liten I. Förluster = I²·R → liten I ger enormt reducerade förluster.",
+      socratic: "Vad händer med förlusteffekten I²R om strömmen halveras? Och om strömmen minskar tio gånger?",
+      praise: "Utmärkt systemtänkande! Högt U → lågt I → I²R-förluster minskar med kvadraten. Det är varför vi har 400 kV i stamnätet."
+    },
+    {
+      id: "em4", type: "mc",
+      q: "En primärtransformator drar 2 A vid 230 V. Sekundärsidan har 46 V. Vilken ström flödar i sekundärsidan? (ideal transformator)",
+      opts: ["A) 2 A", "B) 0,4 A", "C) 10 A", "D) 20 A"],
+      correct: "C",
+      explain: "P_in = P_ut → U₁·I₁ = U₂·I₂ → I₂ = U₁·I₁/U₂ = 230·2/46 = 10 A.",
+      socratic: "För en ideal transformator bevaras effekten. P₁ = U₁·I₁. Sätt P₁ = P₂ och lös ut I₂.",
+      praise: "Perfekt! Effekten bevaras: 230·2 = 46·I₂ → I₂ = 460/46 = 10 A."
+    }
+  ],
+  quiz: [
+    { id:"emq1", q:"Vad uppfann Faraday som gör modern elproduktion möjlig?", opts:["A) Ohms lag","B) Transformatorn och generatorn (elektromagnetisk induktion)","C) Atomkärnan","D) Transistorn"], correct:"B", explain:"Faraday formulerade induktionslagen och byggde den första praktiska generatorn och transformatorn." },
+    { id:"emq2", q:"Transformatorförhållande: N₁=100, N₂=500, U₁=50V. U₂=?", opts:["A) 10 V","B) 250 V","C) 500 V","D) 100 V"], correct:"B", explain:"U₂ = U₁·N₂/N₁ = 50·500/100 = 250 V." },
+    { id:"emq3", q:"En elektromagnet görs starkare om man:", opts:["A) Minskar strömmen","B) Ökar strömmen eller antalet varv","C) Använder aluminium","D) Minskar antalet varv"], correct:"B", explain:"Starkare ström och/eller fler varv → starkare magnetfält." },
+    { id:"emq4", q:"Lenz lag säger att inducerad ström:", opts:["A) Är alltid positiv","B) Motverkar den förändring som skapar den","C) Förstärker det yttre magnetfältet","D) Flödar i strömriktningen"], correct:"B", explain:"Lenz lag: inducerad ström skapar ett magnetfält som motverkar den ursprungliga förändringen (energibevarning)." },
+    { id:"emq5", q:"Varför används järnkärna i transformatorer?", opts:["A) Järn är billigare","B) Järn leder magnetfältet och koncentrerar det","C) Järn leder elektricitet bra","D) Järn isolerar från kortslutning"], correct:"B", explain:"Järnkärnan leder magnetfältet effektivt och kopplar ihop primär- och sekundärlindning magnetiskt." },
+  ],
+  test: [
+    { id:"emt1", q:"N₁=400, N₂=40, U₁=240V. U₂=?", opts:["A) 2400 V","B) 24 V","C) 440 V","D) 200 V"], correct:"B", explain:"U₂ = 240·40/400 = 24 V. En nedåttransformator." },
+    { id:"emt2", q:"Vad induceras i en ledare som rör sig i ett magnetfält?", opts:["A) Magnetfält","B) Elektrisk spänning (EMK)","C) Temperaturökning","D) Friktion"], correct:"B", explain:"Rörelse i magnetfält → förändrat flöde → inducerad EMK (Faradays lag)." },
+    { id:"emt3", q:"P=UI. Primär: U₁=120V, I₁=4A. Sekundär: U₂=480V. I₂=?", opts:["A) 16 A","B) 4 A","C) 1 A","D) 0,5 A"], correct:"C", explain:"P = 120·4 = 480 W. I₂ = P/U₂ = 480/480 = 1 A." },
+    { id:"emt4", q:"Varför är AC (växelström) nödvändig för transformatorer?", opts:["A) DC är för farlig","B) Transformatorer kräver föränderligt magnetfält — DC ger konstant fält → ingen induktion","C) AC är billigare","D) DC driver bara motorer"], correct:"B", explain:"Transformatorer bygger på ΔΦ/Δt. DC ger konstant flöde → ΔΦ=0 → ingen induktion. AC varierar → induktion fungerar." },
+    { id:"emt5", q:"Höger-handsregeln används för att bestämma:", opts:["A) Strömmens storlek","B) Magnetfältets riktning kring en strömsförande ledare","C) Resistansen","D) Effekten"], correct:"B", explain:"Höger-handsregeln: tumme i strömriktning → övriga fingrar visar magnetfältets cirkulärriktning." },
+  ]
+},
+{
+  id: 6,
+  title: "Atom- och kärnfysik",
+  subtitle: "Atommodellen, radioaktivitet och kärnreaktioner",
+  icon: "⚛️",
+  color: "#BE185D",
+  physicist: {
+    name: "Niels Bohr",
+    years: "1885–1962",
+    portrait: "⚛️",
+    text: "Niels Bohr var en dansk fysiker som omformulerade atommodellen 1913. Rutherford hade visat att atomen har en liten, tät kärna — men kunde inte förklara varför elektroner inte spiralerade in i kärnan och förstörde atomen. Bohr föreslog att elektroner bara kan befinna sig i vissa tillåtna banor (energinivåer) och att de hoppar mellan banor genom att absorbera eller emittera fotoner med specifik energi. Modellen förklarade vätes spektrallinjer perfekt. Bohr grundade Köpenhamnsinstitutet som blev centrum för kvantteorin. Han ledde Manhattanprojektet som rådgivare och argumenterade sedan kraftfullt för fredlig användning av kärnenergi. 1922 fick han Nobelpriset i fysik.",
+    quote: "En expert är en person som har begått alla möjliga misstag inom ett mycket snävt område."
+  },
+  concepts: [
+    {
+      title: "⚛️ Atomen och kärnans uppbyggnad",
+      body: "Atomen består av en kärna (protoner och neutroner) omgiven av elektroner i skal (Bohrs modell). Protoner = positiva, elektroner = negativa, neutroner = laddningsneutrala. Atomnumret Z = antal protoner. Masstal A = protoner + neutroner. Isotoper = samma Z men olika antal neutroner.",
+      formula: "Notation: ᴬ_Z X   t.ex.  ¹²_₆ C (kol-12)",
+      formulaExplain: "A = masstal (protoner + neutroner)  ·  Z = atomnummer (protoner)"
+    },
+    {
+      title: "☢️ Radioaktivitet — tre strålningstyper",
+      body: "Instabila atomkärnor sönderfaller spontant (radioaktivt sönderfall). Alpha-strålning (α): heliumkärna, låg genomträngningsförmåga. Beta-strålning (β): elektron, medelhög. Gamma-strålning (γ): elektromagnetisk strålning, hög genomträngningsförmåga. Halveringstiden T½ = tid för hälften av atomerna att sönderfalla.",
+      formula: "N(t) = N₀ · (½)^(t/T½)",
+      formulaExplain: "N₀ = ursprunglig mängd  ·  t = tid  ·  T½ = halveringstid"
+    },
+    {
+      title: "💥 Kärnreaktioner och E=mc²",
+      body: "Vid kärnfission (klyvning) och fusion (sammanslagning) frigörs enorma mängder energi. Massan av produkterna är liten än massan av reaktanterna — 'massfelet' Δm omvandlas till energi enligt Einsteins berömda formel. Ett litet Δm ger enorm energi.",
+      formula: "E = Δm · c²",
+      formulaExplain: "c = ljushastigheten ≈ 3×10⁸ m/s  ·  Δm = massdefekt i kg"
+    }
+  ],
+  practice: [
+    {
+      id: "at1", type: "mc",
+      q: "En atom har 8 protoner, 8 neutroner och 8 elektroner. Vad är atomnumret Z och masstalet A?",
+      opts: ["A) Z=8, A=8", "B) Z=8, A=16", "C) Z=16, A=8", "D) Z=8, A=24"],
+      correct: "B",
+      explain: "Z = antal protoner = 8. A = protoner + neutroner = 8+8 = 16. Det är syre-16 (O-16).",
+      socratic: "Vad definierar atomnumret Z? Och masstalet A? Är elektroner med i masstalet?",
+      praise: "Rätt! Z=8 (syre), A=16. Elektroner bidrar inte nämnvärt till massan."
+    },
+    {
+      id: "at2", type: "mc",
+      q: "En radioaktiv substans har halveringstiden T½ = 10 år och börjar med 80 g. Hur mycket återstår efter 30 år?",
+      opts: ["A) 40 g", "B) 20 g", "C) 10 g", "D) 5 g"],
+      correct: "C",
+      explain: "30 år = 3 × T½. N = 80 × (½)³ = 80 × 1/8 = 10 g.",
+      socratic: "Hur många halveringstider ryms i 30 år om T½=10 år? Vad händer med mängden för varje halveringstid?",
+      praise: "Perfekt! 3 halvering ar: 80→40→20→10 g. Exponentiellt sönderfall."
+    },
+    {
+      id: "at3", type: "mc",
+      q: "Vilken strålningstyp stoppas av ett papper?",
+      opts: ["A) Gammastrålning", "B) Betastrålning", "C) Alfastrålning", "D) Röntgenstrålning"],
+      correct: "C",
+      explain: "Alfastrålning (heliumkärnor) har låg genomträngningsförmåga — stoppas av ett papper eller huden. Beta kräver aluminium. Gamma kräver bly.",
+      socratic: "Tänk på storleken hos varje strålningstyp. Vilken är 'tyngst' och störst? Hur relaterar storlek till genomträngningsförmåga?",
+      praise: "Rätt! α-partiklar är stora och dubbelt positivt laddade → stannar snabbt."
+    },
+    {
+      id: "at4", type: "mc",
+      q: "Varför frigörs energi vid kärnfission av uran?",
+      opts: ["A) Kärnan brinner — kemisk reaktion", "B) Produkternas totala massa är mindre än uranets — massfelet ger energi enligt E=mc²", "C) Neutroner rör sig snabbare", "D) Elektroner faller till lägre energinivåer"],
+      correct: "B",
+      explain: "Vid fission: m(produkter) < m(uran). Massfelet Δm omvandlas till energi. E = Δm·c². Litet Δm × enorm c² = enorm energi.",
+      socratic: "Vad säger E=mc² om massa och energi? Vad händer med massa vid kärnfission?",
+      praise: "Utmärkt! Einsteins E=mc² förklarar kärnkraftens energikälla. Tiny Δm × c² = gigantisk energi."
+    }
+  ],
+  quiz: [
+    { id:"atq1", q:"Vad definierar atomnumret Z?", opts:["A) Antal neutroner","B) Antal protoner","C) Antal elektroner + protoner","D) Masstalet"], correct:"B", explain:"Z = antal protoner i kärnan. Det definierar grundämnet. Kol har alltid Z=6." },
+    { id:"atq2", q:"T½ = 5 år, start 100 g. Hur mycket efter 15 år?", opts:["A) 50 g","B) 25 g","C) 12,5 g","D) 6,25 g"], correct:"C", explain:"15/5 = 3 halvering ar. 100 × (½)³ = 100/8 = 12,5 g." },
+    { id:"atq3", q:"Gammastrålning är:", opts:["A) Protonstråle","B) Heliumkärna","C) Elektron","D) Elektromagnetisk strålning med hög energi"], correct:"D", explain:"Gamma = elektromagnetisk strålning med mycket hög frekvens/energi. Ingen massa, ingen laddning." },
+    { id:"atq4", q:"Vad är isotoper?", opts:["A) Atomer med samma antal elektroner","B) Atomer av samma grundämne (samma Z) men olika masstal A (olika antal neutroner)","C) Radioaktiva grundämnen","D) Atomer med positiv laddning"], correct:"B", explain:"Isotoper: samma Z (=samma grundämne), men olika N (neutroner) → olika A. T.ex. C-12, C-13, C-14 är kolisotoper." },
+    { id:"atq5", q:"E = mc². Vad är c?", opts:["A) Laddning","B) Ljushastigheten ≈ 3×10⁸ m/s","C) Koncentrationen","D) Caloriväret"], correct:"B", explain:"c = ljushastigheten i vakuum ≈ 2,998×10⁸ m/s. Den enorma c² gör att liten Δm ger stor energi." },
+  ],
+  test: [
+    { id:"att1", q:"En atom: Z=6, A=14. Antal neutroner = ?", opts:["A) 6","B) 14","C) 8","D) 20"], correct:"C", explain:"Neutroner = A − Z = 14 − 6 = 8. (Det är kol-14, C-14, som används i koldatering.)" },
+    { id:"att2", q:"T½ = 20 år. Hur lång tid tar det för 100 g att minska till 12,5 g?", opts:["A) 20 år","B) 40 år","C) 60 år","D) 80 år"], correct:"C", explain:"100→50→25→12,5 g = 3 halvering ar = 3×20 = 60 år." },
+    { id:"att3", q:"Alfa-strålning vid sönderfall minskar masstalet A med:", opts:["A) 1","B) 2","C) 4","D) 0"], correct:"C", explain:"Alfapartikel = ²₄He → A minskar med 4, Z minskar med 2." },
+    { id:"att4", q:"Vilken typ av kärnreaktion sker i solen?", opts:["A) Fission (klyvning)","B) Fusion (sammanslagning av vätekärnor)","C) Alfasönderfall","D) Betasönderfall"], correct:"B", explain:"I solen fusioneras vätekärnor (protoner) till helium — fusion frigör enorm energi per reaktion." },
+    { id:"att5", q:"Bohrs atommodell förutsäger att elektroner:", opts:["A) Rör sig slumpmässigt","B) Befinner sig i specifika, tillåtna energinivåer (banor)","C) Aldrig ändrar bana","D) Faller in i kärnan"], correct:"B", explain:"Bohrs kvantiserade modell: elektroner i definierade energinivåer. Hopp mellan nivåer → foton emitteras/absorberas." },
+  ]
+}
+];
+
+// ============================================================
+// STATE
+// ============================================================
+const GS = {
+  screen: 'intro',        // intro | moment | quiz | test | rankup | done
+  moment: 0,              // current moment index (0-5)
+  phase: 'bio',           // bio | concept0 | concept1 | concept2 | practice | quiz | test | complete
+  conceptIdx: 0,
+  practiceIdx: 0,
+  practiceResults: {},    // {id: {correct, attempts}}
+  quizResults: {},        // {id: {correct, attempts}}
+  quizNeedsReview: [],    // ids that need retry
+  testResults: {},        // {id: correct}
+  testNeedsRetry: [],     // ids to retry
+  testRetryIdx: 0,
+  completedMoments: [],   // moment ids done
+  xp: 0,
+  socraticShown: {},      // {id: true} if Socratic hint shown
+};
+
+const XP_PRACTICE_CORRECT = 25;
+const XP_QUIZ_PASS = 60;
+const XP_TEST_PASS = 120;
+
+// ============================================================
+// PRAISE & SOCRATIC PHRASES
+// ============================================================
+const PRAISE = [
+  '🌟 Utmärkt!','🎯 Spot on!','⚡ Korrekt!','🏆 Briljant!',
+  '🔬 Precis rätt!','💡 Exakt!','🚀 Perfekt!','🎓 Bra jobbat!'
+];
+const ENCOURAGE = [
+  'Tänk på formeln steg för steg.',
+  'Du är nära — läs ledtråden noggrant.',
+  'Fel svar är lika viktiga som rätta — de visar vad du behöver öva.',
+  'Tänk som Faraday: vad observerar du? Vad kan du dra för slutsats?',
+  'Varje misstag är ett experiment som lär dig något nytt!',
+];
+function randFrom(arr) { return arr[Math.floor(Math.random()*arr.length)]; }
+
+// ============================================================
+// XP & RANK
+// ============================================================
+function addXP(amount) {
+  GS.xp += amount;
+  updateRankHeader();
+}
+function updateRankHeader() {
+  const rank = getRank(GS.xp);
+  const next = rank.next;
+  const prev = rank.min;
+  const pct = next < 9999 ? Math.round((GS.xp - prev) / (next - prev) * 100) : 100;
+  document.getElementById('rankIcon').textContent = rank.icon;
+  document.getElementById('rankLabel').textContent = rank.label;
+  document.getElementById('xpFill').style.width = pct + '%';
+  document.getElementById('xpLabel').textContent = GS.xp + ' XP';
+}
+
+// ============================================================
+// RENDER ENGINE
+// ============================================================
+function render() {
+  const app = document.getElementById('app');
+  app.className = 'fade-in';
+  void app.offsetWidth;
+  app.className = 'fade-in';
+  if (GS.screen === 'intro') renderIntro(app);
+  else if (GS.screen === 'moment') renderMoment(app);
+  else if (GS.screen === 'quiz') renderQuiz(app);
+  else if (GS.screen === 'quizreview') renderQuizReview(app);
+  else if (GS.screen === 'test') renderTest(app);
+  else if (GS.screen === 'testresult') renderTestResult(app);
+  else if (GS.screen === 'testretry') renderTestRetry(app);
+  else if (GS.screen === 'rankup') renderRankUp(app);
+  else if (GS.screen === 'done') renderDone(app);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ============================================================
+// INTRO
+// ============================================================
+function renderIntro(app) {
+  const html = `
+  <div class="intro-hero">
+    <h1>TÄNK SOM EN<br><span>FYSIKER</span></h1>
+    <p class="intro-sub">Fysik 1 · Gy11 · Lär dig de stora idéerna — ett moment i taget. Klara quiz och prov för att avancera från Nybörjare till Fysiker.</p>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:16px">
+      <span class="chip chip-phys">6 moment</span>
+      <span class="chip chip-gold">Quiz + Prov per moment</span>
+      <span class="chip" style="background:var(--ok-bg);color:var(--ok);border:1px solid var(--ok-bd)">Sokratiska ledtrådar</span>
+    </div>
+  </div>
+  <div class="moment-preview">
+    ${MOMENTS.map((m, i) => {
+      const done = GS.completedMoments.includes(m.id);
+      const locked = i > 0 && !GS.completedMoments.includes(MOMENTS[i-1].id);
+      return `
+      <div class="mp-card" style="opacity:${locked?0.5:1};cursor:${locked?'not-allowed':'pointer'};border:1.5px solid ${done?'var(--ok-bd)':'var(--border)'};background:${done?'var(--ok-bg)':'var(--surface)'}"
+           onclick="${locked ? '' : `startMoment(${i})`}">
+        <div class="mp-num">${done ? '✅' : locked ? '🔒' : '▶'} MOMENT ${m.id}</div>
+        <div class="mp-title">${m.icon} ${m.title}</div>
+        <div class="mp-phys">👤 ${m.physicist.name}</div>
+      </div>`;
+    }).join('')}
+  </div>
+  <div class="card" style="margin-top:4px">
+    <div style="font-size:13px;color:var(--muted);line-height:1.65">
+      <strong style="color:var(--text)">Hur spelet fungerar:</strong><br>
+      📖 Läs biografi och koncept → ✏️ Öva med uppgifter (Sokratiska ledtrådar vid fel) → 
+      📋 Klara quizet (alla rätt!) → 📝 Klara provet (≥70%) → 🏅 Ranka upp!
+    </div>
+  </div>`;
+  app.innerHTML = html;
+}
+
+function startMoment(idx) {
+  GS.moment = idx;
+  GS.phase = 'bio';
+  GS.practiceIdx = 0;
+  GS.practiceResults = {};
+  GS.quizResults = {};
+  GS.quizNeedsReview = [];
+  GS.testResults = {};
+  GS.testNeedsRetry = [];
+  GS.testRetryIdx = 0;
+  GS.socraticShown = {};
+  GS.screen = 'moment';
+  render();
+}
+
+// ============================================================
+// MOMENT PHASES
+// ============================================================
+function renderMoment(app) {
+  const m = MOMENTS[GS.moment];
+  const ph = GS.phase;
+  let html = `
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+    <button class="btn btn-sec" style="padding:7px 13px;font-size:12px" onclick="GS.screen='intro';render()">← Alla moment</button>
+    <span class="chip chip-phys">Moment ${m.id}/6 · ${m.title}</span>
+    <span style="font-size:12px;color:var(--muted)">${phaseLabel(ph)}</span>
+  </div>`;
+
+  if (ph === 'bio') html += renderBio(m);
+  else if (ph.startsWith('concept')) html += renderConcept(m);
+  else if (ph === 'practice') html += renderPractice(m);
+  app.innerHTML = html;
+}
+
+function phaseLabel(ph) {
+  if (ph==='bio') return '👤 Fysikern bakom momentet';
+  if (ph.startsWith('concept')) return '📖 Grundbegrepp';
+  if (ph==='practice') return '✏️ Öva';
+  return ph;
+}
+
+function renderBio(m) {
+  return `
+  <div class="bio-card">
+    <div class="bio-portrait">${m.physicist.portrait}</div>
+    <div>
+      <div class="bio-name">${m.physicist.name}</div>
+      <div class="bio-years">${m.physicist.years}</div>
+      <div class="bio-text">${m.physicist.text}</div>
+      <div class="bio-quote">"${m.physicist.quote}"</div>
+    </div>
+  </div>
+  <div class="btn-row"><button class="btn btn-full" onclick="GS.phase='concept0';GS.conceptIdx=0;render()">📖 GÅ TILL BEGREPPEN →</button></div>`;
+}
+
+function renderConcept(m) {
+  const idx = parseInt(GS.phase.replace('concept',''));
+  const c = m.concepts[idx];
+  const total = m.concepts.length;
+  const isLast = idx === total - 1;
+  return `
+  <div class="prog-wrap">
+    <div class="prog-track"><div class="prog-fill" style="width:${Math.round((idx+1)/total*100)}%"></div></div>
+    <div class="prog-lbl">Begrepp ${idx+1} av ${total}</div>
+  </div>
+  <div class="concept-card" style="border-left:4px solid ${m.color}">
+    <div class="concept-title" style="color:${m.color}">${c.title}</div>
+    <div class="concept-body">${c.body}</div>
+    <div class="formula">${c.formula}</div>
+    <div class="formula-explain">${c.formulaExplain}</div>
+  </div>
+  <div class="btn-row">
+    ${idx > 0 ? `<button class="btn btn-sec" onclick="GS.phase='concept${idx-1}';render()">← Föregående</button>` : ''}
+    ${isLast
+      ? `<button class="btn btn-full btn-ok" onclick="GS.phase='practice';GS.practiceIdx=0;render()">✏️ BÖRJA ÖVAL →</button>`
+      : `<button class="btn btn-full" onclick="GS.phase='concept${idx+1}';render()">NÄSTA BEGREPP →</button>`}
+  </div>`;
+}
+
+function renderPractice(ignored) {
+  const m = MOMENTS[GS.moment];
+  const questions = m.practice;
+  const total = questions.length;
+  const allDone = GS.practiceIdx >= total;
+
+  if (allDone) {
+    return `
+    <div class="card ok-accent" style="text-align:center;padding:28px">
+      <div style="font-size:42px">🎉</div>
+      <h2 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin:10px 0 6px">Övningarna klara!</h2>
+      <p style="color:var(--muted);font-size:14px;margin-bottom:16px">Nu är det dags för quizet. Du måste svara rätt på alla frågor för att gå vidare.</p>
+      <button class="btn btn-full btn-ok" onclick="startQuiz()">📋 STARTA QUIZET →</button>
+    </div>`;
+  }
+
+  const q = questions[GS.practiceIdx];
+  const res = GS.practiceResults[q.id];
+  const answered = res !== undefined;
+  const socShown = GS.socraticShown[q.id];
+  const LETTERS = ['A','B','C','D'];
+
+  return `
+  <div class="prog-wrap">
+    <div class="prog-track"><div class="prog-fill" style="width:${Math.round(GS.practiceIdx/total*100)}%"></div></div>
+    <div class="prog-lbl">Uppgift ${GS.practiceIdx+1} av ${total}</div>
+  </div>
+  <div class="q-card ${answered && res.correct ? 'ok-accent' : ''}">
+    <div class="q-meta">
+      <span class="chip chip-phys">Övning</span>
+      <span>${m.title}</span>
+    </div>
+    <div class="q-txt">${q.q}</div>
+    <div class="options">
+      ${q.opts.map((opt, i) => {
+        const letter = LETTERS[i];
+        const isChosen = answered && res.chosen === letter;
+        const isCorrect = letter === q.correct;
+        let cls = '';
+        if (answered) {
+          if (isChosen && isCorrect) cls = 'correct locked';
+          else if (isChosen && !isCorrect) cls = 'wrong locked';
+          else if (isCorrect) cls = 'show-correct locked';
+          else cls = 'locked';
+        }
+        return `<button class="opt ${cls}" onclick="${answered ? '' : `practicePick('${q.id}','${letter}')`}">
+          <div class="opt-letter">${answered&&isCorrect?'✓':answered&&isChosen&&!isCorrect?'✗':letter}</div>
+          <div>${opt.replace(/^[A-D]\)\s*/,'')}</div>
+        </button>`;
+      }).join('')}
+    </div>
+    ${answered && res.correct ? `
+      <div class="fb ok">
+        <strong>${randFrom(PRAISE)} <span class="xp-burst">+${XP_PRACTICE_CORRECT} XP</span></strong>
+        ${q.praise}
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-full" onclick="practiceNext()">${GS.practiceIdx+1 < total ? 'NÄSTA UPPGIFT →' : '🎉 ALLA KLARA →'}</button>
+      </div>` : ''}
+    ${answered && !res.correct && !socShown ? `
+      <div class="fb socratic">
+        <strong>🤔 Tänk som en fysiker — Sokratisk fråga:</strong>
+        <div class="hint-q">${q.socratic}</div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-full" onclick="practiceRetry('${q.id}')">🔄 FÖRSÖK IGEN</button>
+      </div>` : ''}
+    ${answered && !res.correct && socShown ? `
+      <div class="fb socratic">
+        <strong>🤔 Sokratisk fråga:</strong>
+        <div class="hint-q">${q.socratic}</div>
+      </div>
+      <div class="fb err" style="margin-top:8px">
+        <strong>📖 Förklaring:</strong> ${q.explain}
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-full" onclick="practiceNext()">${GS.practiceIdx+1 < total ? 'NÄSTA UPPGIFT →' : '🎉 ALLA KLARA →'}</button>
+      </div>` : ''}
+  </div>`;
+}
+
+function practicePick(qid, letter) {
+  const m = MOMENTS[GS.moment];
+  const q = m.practice.find(x => x.id === qid);
+  const correct = letter === q.correct;
+  GS.practiceResults[qid] = { correct, chosen: letter, attempts: (GS.practiceResults[qid]?.attempts||0)+1 };
+  if (correct) addXP(XP_PRACTICE_CORRECT);
+  render();
+}
+
+function practiceRetry(qid) {
+  GS.socraticShown[qid] = true;
+  GS.practiceResults[qid] = undefined;
+  render();
+}
+
+function practiceNext() {
+  GS.practiceIdx++;
+  const m = MOMENTS[GS.moment];
+  if (GS.practiceIdx >= m.practice.length) {
+    // Show "all done" card via renderPractice (allDone branch) — stay in moment/practice phase
+    // practiceIdx is now >= total so renderPractice will show the done card
+  }
+  render();
+}
+
+// ============================================================
+// QUIZ
+// ============================================================
+function startQuiz() {
+  GS.quizResults = {};
+  GS.quizNeedsReview = [];
+  GS.screen = 'quiz';
+  GS.quizCurrentIdx = 0;
+  render();
+}
+
+function renderQuiz(app) {
+  const m = MOMENTS[GS.moment];
+  const isReview = GS.quizNeedsReview.length > 0;
+  const questions = isReview
+    ? m.quiz.filter(q => GS.quizNeedsReview.includes(q.id))
+    : m.quiz;
+
+  const unanswered = questions.filter(q => GS.quizResults[q.id] === undefined);
+  const done = questions.length - unanswered.length;
+
+  if (unanswered.length === 0 && questions.length > 0) {
+    const allCorrect = questions.every(q => GS.quizResults[q.id]?.correct);
+    if (allCorrect) {
+      addXP(XP_QUIZ_PASS);
+      GS.quizNeedsReview = [];
+      GS.screen = 'test';
+      GS.testResults = {};
+      GS.testNeedsRetry = [];
+      GS.testRetryAnswered = false;
+      render(); return;
+    }
+    GS.screen = 'quizreview';
+    render(); return;
+  }
+
+  const q = unanswered[0];
+  const res = GS.quizResults[q.id];
+  const answered = res !== undefined;
+  const LETTERS = ['A','B','C','D'];
+
+  app.innerHTML = `
+  <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
+    <button class="btn btn-sec" style="padding:7px 13px;font-size:12px" onclick="GS.screen='intro';render()">← Alla moment</button>
+    <span class="chip chip-phys">${isReview ? '🔄 Quiz — repetition' : '📋 Quiz'}</span>
+    <span style="font-size:12px;color:var(--muted)">${m.title} · Alla rätt för att gå vidare</span>
+  </div>
+  ${isReview ? `<div class="fb warn" style="margin-bottom:12px"><strong>🔄 Repetition!</strong> Bara de frågor du hade fel på. Klara dem alla.</div>` : ''}
+  <div class="prog-wrap">
+    <div class="prog-track"><div class="prog-fill" style="width:${Math.round(done/questions.length*100)}%"></div></div>
+    <div class="prog-lbl">${done}/${questions.length} besvarade</div>
+  </div>
+  <div class="q-card ${answered && res.correct ? 'ok-accent' : ''}">
+    <div class="q-meta"><span class="chip chip-phys">Quizfråga ${done+1}</span></div>
+    <div class="q-txt">${q.q}</div>
+    <div class="options">
+      ${q.opts.map((opt,i) => {
+        const letter = LETTERS[i];
+        const isChosen = answered && res.chosen === letter;
+        const isCorrect = letter === q.correct;
+        let cls = '';
+        if (answered) {
+          if (isChosen && isCorrect) cls = 'correct locked';
+          else if (isChosen && !isCorrect) cls = 'wrong locked';
+          else if (isCorrect) cls = 'show-correct locked';
+          else cls = 'locked';
+        }
+        return `<button class="opt ${cls}" onclick="${answered ? '' : `quizPick('${q.id}','${letter}')`}">
+          <div class="opt-letter">${answered&&isCorrect?'✓':answered&&isChosen&&!isCorrect?'✗':letter}</div>
+          <div>${opt.replace(/^[A-D]\)\s*/,'')}</div>
+        </button>`;
+      }).join('')}
+    </div>
+    ${answered ? `
+      <div class="fb ${res.correct ? 'ok' : 'err'}" style="margin-top:10px">
+        <strong>${res.correct ? randFrom(PRAISE) : '❌ Inte rätt.'}</strong>
+        ${q.explain}
+      </div>
+      <button class="btn btn-full" style="margin-top:10px" onclick="render()">NÄSTA →</button>` : ''}
+  </div>`;
+}
+
+function quizPick(qid, letter) {
+  const m = MOMENTS[GS.moment];
+  const q = m.quiz.find(x => x.id === qid);
+  GS.quizResults[qid] = { correct: letter === q.correct, chosen: letter };
+  render();
+}
+
+function renderQuizReview(app) {
+  const m = MOMENTS[GS.moment];
+  const wrong = m.quiz.filter(q => GS.quizResults[q.id] && !GS.quizResults[q.id].correct);
+  const LETTERS = ['A','B','C','D'];
+
+  app.innerHTML = `
+  <div class="sec-hd" style="margin-bottom:4px">📋 Quizresultat</div>
+  <div class="sec-sub">Du hade ${wrong.length} fel. Repetera förklaringarna och gör om frågorna du missade.</div>
+  ${m.quiz.map(q => {
+    const res = GS.quizResults[q.id];
+    const isOk = res?.correct;
+    const chosenText = res ? q.opts.find(o => o.startsWith(res.chosen)) : '—';
+    const correctText = q.opts.find(o => o.startsWith(q.correct));
+    return `
+    <div class="review-row">
+      <div class="review-icon">${isOk?'✅':'❌'}</div>
+      <div style="flex:1">
+        <div style="font-weight:600;font-size:13px;margin-bottom:3px">${q.q}</div>
+        ${isOk
+          ? `<span class="sbadge sb-ok">✓ ${correctText}</span>`
+          : `<span style="font-size:13px;color:var(--err);text-decoration:line-through">${chosenText}</span><br>
+             <span class="sbadge sb-ok" style="margin-top:4px">✓ ${correctText}</span>
+             <div style="font-size:12px;color:var(--muted);margin-top:4px;line-height:1.5">💡 ${q.explain}</div>`}
+      </div>
+    </div>`;
+  }).join('')}
+  <div class="btn-row" style="margin-top:16px">
+    <button class="btn btn-full" onclick="retryWrongQuiz()">🔄 GÖR OM FELEN (${wrong.length} frågor)</button>
+  </div>`;
+}
+
+function retryWrongQuiz() {
+  const m = MOMENTS[GS.moment];
+  GS.quizNeedsReview = m.quiz.filter(q => !GS.quizResults[q.id]?.correct).map(q => q.id);
+  // Clear results for wrong ones only
+  GS.quizNeedsReview.forEach(id => { GS.quizResults[id] = undefined; });
+  GS.screen = 'quiz';
+  render();
+}
+
+// ============================================================
+// TEST
+// ============================================================
+function renderTest(app) {
+  const m = MOMENTS[GS.moment];
+  const toAnswer = m.test.filter(q => GS.testResults[q.id] === undefined);
+  if (toAnswer.length === 0) {
+    // All answered → show result
+    GS.screen = 'testresult';
+    render(); return;
+  }
+  const q = toAnswer[0];
+  const done = m.test.length - toAnswer.length;
+  const LETTERS = ['A','B','C','D'];
+
+  app.innerHTML = `
+  <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
+    <span class="chip" style="background:var(--warn-bg);color:var(--warn);border:1px solid var(--warn-bd)">📝 Prov</span>
+    <span style="font-size:12px;color:var(--muted)">${m.title} · Godkänt ≥ 70%</span>
+  </div>
+  <div class="prog-wrap">
+    <div class="prog-track"><div class="prog-fill" style="width:${Math.round(done/m.test.length*100)}%;background:var(--gold)"></div></div>
+    <div class="prog-lbl">${done}/${m.test.length}</div>
+  </div>
+  <div class="q-card">
+    <div class="q-meta"><span class="chip chip-gold">Provfråga ${done+1}</span></div>
+    <div class="q-txt">${q.q}</div>
+    <div class="options">
+      ${q.opts.map((opt,i) => {
+        const letter = LETTERS[i];
+        return `<button class="opt" onclick="testPick('${q.id}','${letter}')">${letter}. ${opt.replace(/^[A-D]\)\s*/,'')}</button>`;
+      }).join('')}
+    </div>
+  </div>`;
+}
+
+function testPick(qid, letter) {
+  const m = MOMENTS[GS.moment];
+  const q = m.test.find(x => x.id === qid);
+  GS.testResults[qid] = { correct: letter === q.correct, chosen: letter };
+  render();
+}
+
+function renderTestResult(app) {
+  const m = MOMENTS[GS.moment];
+  const correct = m.test.filter(q => GS.testResults[q.id]?.correct).length;
+  const total = m.test.length;
+  const pct = Math.round(correct/total*100);
+  const passed = pct >= 70;
+  const wrong = m.test.filter(q => !GS.testResults[q.id]?.correct);
+  const LETTERS = ['A','B','C','D'];
+
+  if (passed && wrong.length === 0) {
+    // Perfect or all retried — rank up!
+    if (!GS.completedMoments.includes(m.id)) {
+      addXP(XP_TEST_PASS);
+      GS.completedMoments.push(m.id);
+    }
+    GS.screen = 'rankup';
+    render(); return;
+  }
+
+  app.innerHTML = `
+  <div class="card" style="text-align:center;padding:24px">
+    <div class="score-c ${passed?'pass':'fail'}">
+      <div class="score-pct">${pct}%</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:1px">${correct}/${total}</div>
+    </div>
+    <h2 style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800">${passed?'🎓 Godkänt!':'📚 Ej godkänt'}</h2>
+    <p style="color:var(--muted);margin-top:6px;font-size:13px">${passed
+      ? `Du klarade provet med ${pct}%! Nu ska du rätta dina fel för att befästa kunskapen.`
+      : `Du fick ${pct}% — behöver 70% för godkänt. Läs förklaringarna och försök igen.`}</p>
+  </div>
+
+  <div class="sec-hd" style="margin:14px 0 4px">Genomgång — alla frågor</div>
+  ${m.test.map(q => {
+    const res = GS.testResults[q.id];
+    const isOk = res?.correct;
+    const chosenText = res ? q.opts.find(o => o.startsWith(res.chosen)) : '—';
+    const correctText = q.opts.find(o => o.startsWith(q.correct));
+    return `
+    <div class="review-row">
+      <div class="review-icon">${isOk?'✅':'❌'}</div>
+      <div style="flex:1">
+        <div style="font-weight:600;font-size:13px;margin-bottom:3px">${q.q}</div>
+        ${isOk
+          ? `<span class="sbadge sb-ok">✓ ${correctText}</span>`
+          : `<span style="font-size:13px;color:var(--err);text-decoration:line-through">${chosenText}</span><br>
+             <span class="sbadge sb-ok" style="margin-top:4px">✓ ${correctText}</span>
+             <div style="font-size:12px;color:var(--muted);margin-top:4px;line-height:1.5">💡 ${q.explain}</div>`}
+      </div>
+      <span class="sbadge ${isOk?'sb-ok':'sb-err'}">${isOk?'RÄTT':'FEL'}</span>
+    </div>`;
+  }).join('')}
+
+  <div class="btn-row" style="margin-top:16px">
+    ${passed && wrong.length > 0
+      ? `<button class="btn btn-full btn-ok" onclick="startTestRetry()">🔄 GÖR OM FELEN (${wrong.length} st) →</button>`
+      : !passed
+        ? `<button class="btn btn-full" onclick="GS.testResults={};GS.screen='test';render()">🔄 GÖR OM PROVET</button>`
+        : ''}
+  </div>`;
+}
+
+function startTestRetry() {
+  const m = MOMENTS[GS.moment];
+  GS.testNeedsRetry = m.test.filter(q => !GS.testResults[q.id]?.correct).map(q => q.id);
+  GS.testRetryIdx = 0;
+  GS.screen = 'testretry';
+  render();
+}
+
+function renderTestRetry(app) {
+  const m = MOMENTS[GS.moment];
+  const toRetry = m.test.filter(q => GS.testNeedsRetry.includes(q.id));
+  const current = toRetry[GS.testRetryIdx];
+
+  if (!current) {
+    // Handled in testRetryNext — shouldn't reach here, but safe fallback
+    if (!GS.completedMoments.includes(m.id)) {
+      addXP(XP_TEST_PASS);
+      GS.completedMoments.push(m.id);
+    }
+    GS.screen = 'rankup';
+    render(); return;
+  }
+
+  const res = GS.testResults[current.id];
+  const answered = res && GS.testRetryAnswered;
+  const LETTERS = ['A','B','C','D'];
+
+  if (!answered) {
+    app.innerHTML = `
+    <div class="fb warn" style="margin-bottom:12px"><strong>🔄 Rätta dina fel</strong> — ${GS.testRetryIdx+1} av ${toRetry.length}</div>
+    <div class="q-card">
+      <div class="q-meta"><span class="chip chip-gold">Omgång</span></div>
+      <div class="q-txt">${current.q}</div>
+      <div class="options">
+        ${current.opts.map((opt,i) => {
+          const letter = LETTERS[i];
+          return `<button class="opt" onclick="testRetryPick('${current.id}','${letter}')">${letter}. ${opt.replace(/^[A-D]\)\s*/,'')}</button>`;
+        }).join('')}
+      </div>
+    </div>`;
+  } else {
+    const correct = res.correct;
+    const chosenText = current.opts.find(o => o.startsWith(res.chosen));
+    const correctText = current.opts.find(o => o.startsWith(current.correct));
+    app.innerHTML = `
+    <div class="q-card ${correct?'ok-accent':''}">
+      <div class="q-txt">${current.q}</div>
+      <div class="options">
+        ${current.opts.map((opt,i) => {
+          const letter = LETTERS[i];
+          const isChosen = res.chosen===letter;
+          const isCorrect = letter===current.correct;
+          let cls = isChosen&&isCorrect?'correct locked':isChosen&&!isCorrect?'wrong locked':isCorrect?'show-correct locked':'locked';
+          return `<button class="opt ${cls}"><div class="opt-letter">${isCorrect?'✓':isChosen?'✗':letter}</div><div>${opt.replace(/^[A-D]\)\s*/,'')}</div></button>`;
+        }).join('')}
+      </div>
+      <div class="fb ${correct?'ok':'err'}" style="margin-top:10px">
+        <strong>${correct ? randFrom(PRAISE)+' Rätt den här gången!' : '❌ Fortfarande fel.'}</strong>
+        ${current.explain}
+      </div>
+      <button class="btn btn-full" style="margin-top:12px" onclick="testRetryNext()">
+        ${GS.testRetryIdx+1<toRetry.length ? 'NÄSTA →' : '✅ KLARA MOMENT →'}
+      </button>
+    </div>`;
+  }
+}
+
+function testRetryPick(qid, letter) {
+  const m = MOMENTS[GS.moment];
+  const q = m.test.find(x => x.id === qid);
+  GS.testResults[qid] = { correct: letter === q.correct, chosen: letter };
+  GS.testRetryAnswered = true;
+  render();
+}
+
+function testRetryNext() {
+  GS.testRetryIdx++;
+  GS.testRetryAnswered = false;
+  const m = MOMENTS[GS.moment];
+  const toRetry = m.test.filter(q => GS.testNeedsRetry.includes(q.id));
+  if (GS.testRetryIdx >= toRetry.length) {
+    // All retried — go to rankup
+    if (!GS.completedMoments.includes(m.id)) {
+      addXP(XP_TEST_PASS);
+      GS.completedMoments.push(m.id);
+    }
+    GS.screen = 'rankup';
+  }
+  render();
+}
+
+// ============================================================
+// RANK UP
+// ============================================================
+function renderRankUp(app) {
+  const m = MOMENTS[GS.moment];
+  const rank = getRank(GS.xp);
+  const allDone = GS.completedMoments.length === MOMENTS.length;
+
+  app.innerHTML = `
+  <div class="rank-up">
+    <div class="rank-up-icon">${rank.icon}</div>
+    <div class="rank-stars">⭐⭐⭐</div>
+    <div class="rank-up-title">Moment ${m.id} klarat!</div>
+    <div class="rank-up-sub" style="margin-bottom:8px">${m.title} — ${m.physicist.name}</div>
+    <div style="background:var(--phys-bg);border:1px solid var(--phys-bd);border-radius:10px;padding:12px 16px;margin:14px auto;max-width:320px">
+      <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:var(--phys)">Din rang: ${rank.icon} ${rank.label}</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:3px">${GS.xp} XP totalt</div>
+    </div>
+    ${allDone ? `
+      <div class="fb ok" style="max-width:400px;margin:0 auto 16px">
+        <strong>🎓 ALLA 6 MOMENT KLARADE!</strong>
+        Du är nu en fullfjädrad Fysiker!
+      </div>
+    ` : `
+      <div style="font-size:13px;color:var(--muted);margin-bottom:16px">
+        ${MOMENTS.length - GS.completedMoments.length} moment kvar till du blir Fysiker!
+      </div>
+    `}
+    <div class="btn-row" style="justify-content:center">
+      ${allDone
+        ? `<button class="btn btn-full btn-gold" onclick="GS.screen='done';render()">🏆 SE DITT BETYG →</button>`
+        : `<button class="btn btn-full" onclick="GS.screen='intro';render()">→ NÄSTA MOMENT</button>`}
+    </div>
+  </div>`;
+}
+
+// ============================================================
+// DONE SCREEN
+// ============================================================
+function renderDone(app) {
+  const rank = getRank(GS.xp);
+  app.innerHTML = `
+  <div style="text-align:center;padding:32px 16px">
+    <div style="font-size:56px;margin-bottom:10px">⚡</div>
+    <h1 style="font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:var(--phys)">GRATTIS, FYSIKER!</h1>
+    <p style="color:var(--muted);font-size:15px;margin:8px 0 20px">Du har klarat alla 6 moment i Fysik 1!</p>
+    <div style="background:var(--phys-bg);border:2px solid var(--phys-bd);border-radius:14px;padding:20px;max-width:400px;margin:0 auto 20px">
+      <div style="font-size:48px">${rank.icon}</div>
+      <div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:var(--phys)">${rank.label}</div>
+      <div style="font-size:16px;color:var(--muted);margin-top:4px">${GS.xp} XP</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:14px 0;max-width:440px;margin-left:auto;margin-right:auto">
+      ${MOMENTS.map(m => `
+        <div style="background:var(--ok-bg);border:1px solid var(--ok-bd);border-radius:8px;padding:10px 6px;text-align:center">
+          <div style="font-size:20px">${m.icon}</div>
+          <div style="font-size:10px;font-weight:700;color:var(--ok);font-family:'Syne',sans-serif">${m.title}</div>
+          <div style="font-size:9px;color:var(--muted)">${m.physicist.name}</div>
+        </div>`).join('')}
+    </div>
+    <button class="btn" onclick="GS.screen='intro';render()">🔄 Spela igen</button>
+  </div>`;
+}
+
+// ============================================================
+// INIT
+// ============================================================
+updateRankHeader();
+render();
+</script>
+</body>
+</html>
