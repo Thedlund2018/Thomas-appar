@@ -152,94 +152,115 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px;
 .slider-val { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px; min-width: 80px; text-align: right; color: var(--l1); }
 
 /* MINI CALCULATOR */
-.calc-widget {
-  background: #F0F7FF;
-  border: 2px solid #A3C4E8;
-  border-radius: 12px;
-  padding: 14px 16px;
-  margin: 12px 0 6px;
-}
-.calc-widget-title {
+/* FLOATING CALCULATOR */
+.calc-open-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--surface);
+  border: 2px solid var(--l2);
+  border-radius: 9px;
+  padding: 9px 16px;
   font-family: 'Syne', sans-serif;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 800;
   color: var(--l2);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 10px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.calc-widget-rows {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-bottom: 10px;
-}
-.calc-widget-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-.calc-widget-row label {
-  font-size: 12px;
-  color: var(--muted);
-  font-weight: 600;
-  min-width: 110px;
-}
-.cwi {
-  background: var(--surface);
-  border: 1.5px solid var(--border-strong);
-  border-radius: 7px;
-  padding: 7px 10px;
-  font-size: 14px;
-  font-family: 'Syne', sans-serif;
-  font-weight: 700;
-  width: 120px;
-  text-align: right;
-  color: var(--text);
-}
-.cwi:focus { outline: none; border-color: var(--l2); background: var(--info-bg); }
-.calc-op {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--muted);
-  min-width: 16px;
-  text-align: center;
-}
-.calc-result-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--surface);
-  border: 1.5px solid var(--l2);
-  border-radius: 8px;
-  padding: 8px 12px;
-  margin-top: 6px;
-}
-.calc-result-label { font-size: 13px; color: var(--muted); font-weight: 600; flex: 1; }
-.calc-result-val {
-  font-family: 'Syne', sans-serif;
-  font-size: 18px;
-  font-weight: 800;
-  color: var(--l2);
-}
-.calc-use-btn {
-  background: var(--l2);
-  color: #fff;
-  border: none;
-  border-radius: 7px;
-  padding: 7px 13px;
-  font-family: 'Syne', sans-serif;
-  font-size: 12px;
-  font-weight: 800;
   cursor: pointer;
   transition: all 0.15s;
-  white-space: nowrap;
+  margin: 12px 0 6px;
 }
-.calc-use-btn:hover { filter: brightness(1.1); }
+.calc-open-btn:hover { background: var(--info-bg); transform: translateY(-1px); }
+.calc-open-btn .calc-icon { font-size: 18px; }
+
+.float-calc-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.15s ease;
+}
+.float-calc-box {
+  background: var(--surface);
+  border: 2px solid var(--l2);
+  border-radius: 16px;
+  padding: 20px;
+  width: 280px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+}
+.float-calc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.float-calc-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--l2);
+}
+.float-calc-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: var(--muted);
+  line-height: 1;
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+.float-calc-close:hover { background: var(--bg); color: var(--text); }
+.float-calc-display {
+  background: var(--bg);
+  border: 2px solid var(--border-strong);
+  border-radius: 9px;
+  padding: 12px 14px;
+  font-family: 'Syne', sans-serif;
+  font-size: 24px;
+  font-weight: 800;
+  text-align: right;
+  color: var(--text);
+  margin-bottom: 12px;
+  min-height: 52px;
+  word-break: break-all;
+  line-height: 1.2;
+}
+.float-calc-display .expr {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 400;
+  display: block;
+  margin-bottom: 2px;
+  text-align: right;
+  min-height: 16px;
+}
+.calc-btns {
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  gap: 7px;
+}
+.cb {
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 13px 4px;
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.1s;
+  color: var(--text);
+  text-align: center;
+}
+.cb:hover { background: var(--info-bg); border-color: var(--l2); }
+.cb.op { background: var(--info-bg); color: var(--l2); border-color: var(--l2); }
+.cb.eq { background: var(--l2); color: #fff; border-color: var(--l2); }
+.cb.eq:hover { filter: brightness(1.1); }
+.cb.clr { background: #FDECEA; color: var(--danger); border-color: var(--danger-border); }
+.cb.pct-btn { background: var(--warning-bg); color: var(--warning); border-color: var(--warning-border); }
 
 /* NUMBER INPUT */
 .num-input-wrap { display: flex; align-items: center; gap: 8px; }
@@ -485,83 +506,116 @@ const HOUSING = {
 const fmt = (n) => n.toLocaleString('sv-SE') + ' kr';
 
 // ============================================================
-// MINI CALCULATOR HELPERS
+// FLOATING CALCULATOR
 // ============================================================
-function calcNet() {
-  const gross = parseFloat(document.getElementById('cw_gross').value) || 0;
-  const taxPct = parseFloat(document.getElementById('cw_tax').value) || 31;
-  const result = Math.round(gross * (1 - taxPct / 100));
-  document.getElementById('cw_net_result').textContent = result > 0 ? result.toLocaleString('sv-SE') + ' kr' : '—';
-  document.getElementById('cw_net_result').dataset.val = result;
+const CALC = { expr: '', result: '0', op: null, prev: null, newNum: true };
+
+function openCalc() {
+  if (document.getElementById('floatCalcOverlay')) return;
+  const overlay = document.createElement('div');
+  overlay.id = 'floatCalcOverlay';
+  overlay.className = 'float-calc-overlay';
+  overlay.innerHTML = `
+    <div class="float-calc-box" onclick="event.stopPropagation()">
+      <div class="float-calc-header">
+        <span class="float-calc-title">🧮 Miniräknare</span>
+        <button class="float-calc-close" onclick="closeCalc()">✕</button>
+      </div>
+      <div class="float-calc-display">
+        <span class="expr" id="calcExpr"></span>
+        <span id="calcDisplay">0</span>
+      </div>
+      <div class="calc-btns">
+        <button class="cb clr" onclick="calcC()">C</button>
+        <button class="cb op" onclick="calcSign()">+/−</button>
+        <button class="cb pct-btn" onclick="calcPct()">%</button>
+        <button class="cb op" onclick="calcOp('÷')">÷</button>
+
+        <button class="cb" onclick="calcNum('7')">7</button>
+        <button class="cb" onclick="calcNum('8')">8</button>
+        <button class="cb" onclick="calcNum('9')">9</button>
+        <button class="cb op" onclick="calcOp('×')">×</button>
+
+        <button class="cb" onclick="calcNum('4')">4</button>
+        <button class="cb" onclick="calcNum('5')">5</button>
+        <button class="cb" onclick="calcNum('6')">6</button>
+        <button class="cb op" onclick="calcOp('−')">−</button>
+
+        <button class="cb" onclick="calcNum('1')">1</button>
+        <button class="cb" onclick="calcNum('2')">2</button>
+        <button class="cb" onclick="calcNum('3')">3</button>
+        <button class="cb op" style="grid-row:span 2" onclick="calcOp('+')">+</button>
+
+        <button class="cb" style="grid-column:span 2" onclick="calcNum('0')">0</button>
+        <button class="cb" onclick="calcNum('.')">.</button>
+
+        <button class="cb eq" style="grid-column:span 4;padding:14px" onclick="calcEquals()">=</button>
+      </div>
+    </div>`;
+  overlay.addEventListener('click', closeCalc);
+  document.body.appendChild(overlay);
+  CALC.expr=''; CALC.result='0'; CALC.op=null; CALC.prev=null; CALC.newNum=true;
+  updateCalcDisplay();
 }
 
-function calcNetUse() {
-  const val = document.getElementById('cw_net_result').dataset.val;
-  if (val && +val > 0) {
-    GS.l1.netInput = val;
-    document.getElementById('netInput').value = val;
-    checkNet();
-  }
+function closeCalc() {
+  const el = document.getElementById('floatCalcOverlay');
+  if (el) el.remove();
 }
 
-function calcAnnual() {
-  const monthly = parseFloat(document.getElementById('cw_monthly').value) || 0;
-  const months = parseFloat(document.getElementById('cw_months_a').value) || 12;
-  const result = Math.round(monthly * months);
-  document.getElementById('cw_annual_result').textContent = result > 0 ? result.toLocaleString('sv-SE') + ' kr' : '—';
-  document.getElementById('cw_annual_result').dataset.val = result;
+function updateCalcDisplay() {
+  const disp = document.getElementById('calcDisplay');
+  const expr = document.getElementById('calcExpr');
+  if (disp) {
+    const n = parseFloat(CALC.result);
+    disp.textContent = isNaN(n) ? 'Fel' : n.toLocaleString('sv-SE', {maximumFractionDigits:8});
+  }
+  if (expr) expr.textContent = CALC.expr;
 }
 
-function calcAnnualUse() {
-  const val = document.getElementById('cw_annual_result').dataset.val;
-  if (val && +val > 0) {
-    GS.l2.annualInput = val;
-    document.getElementById('annualInput').value = val;
-    checkAnnual();
-  }
+function calcNum(d) {
+  if (CALC.newNum) { CALC.result = d === '.' ? '0.' : d; CALC.newNum = false; }
+  else if (d === '.' && CALC.result.includes('.')) return;
+  else if (CALC.result === '0' && d !== '.') CALC.result = d;
+  else CALC.result += d;
+  updateCalcDisplay();
 }
 
-function calcLoan() {
-  const principal = parseFloat(document.getElementById('cw_loan')?.value) || 0;
-  const annualRate = parseFloat(document.getElementById('cw_lrate')?.value) || 0;
-  const months = parseFloat(document.getElementById('cw_lmonths')?.value) || 1;
-  let monthly;
-  if (annualRate === 0) {
-    monthly = Math.round(principal / months);
-  } else {
-    const r = annualRate / 100 / 12;
-    monthly = Math.round(principal * r / (1 - Math.pow(1 + r, -months)));
-  }
-  const total = monthly * months;
-  const interest = total - principal;
-  const mEl = document.getElementById('cw_loan_monthly');
-  const iEl = document.getElementById('cw_loan_interest');
-  if (mEl) mEl.textContent = monthly.toLocaleString('sv-SE') + ' kr';
-  if (iEl) iEl.textContent = Math.max(0, interest).toLocaleString('sv-SE') + ' kr';
+function calcOp(op) {
+  CALC.prev = parseFloat(CALC.result);
+  CALC.expr = CALC.result + ' ' + op;
+  CALC.op = op;
+  CALC.newNum = true;
+  updateCalcDisplay();
 }
 
-function calcBuffer() {
-  const target = parseFloat(document.getElementById('cw_buf_target')?.value) || 0;
-  const monthly = parseFloat(document.getElementById('cw_buf_monthly')?.value) || 0;
-  const annualRate = parseFloat(document.getElementById('cw_buf_rate')?.value) || 0;
-  if (monthly <= 0 || target <= 0) {
-    const m = document.getElementById('cw_buf_months');
-    const i = document.getElementById('cw_buf_interest');
-    if (m) m.textContent = '—'; if (i) i.textContent = '—'; return;
-  }
-  // Simulate month by month with compound interest
-  let balance = 0, months = 0;
-  const r = annualRate / 100 / 12;
-  while (balance < target && months < 1200) {
-    balance = balance * (1 + r) + monthly;
-    months++;
-  }
-  const totalPaid = monthly * months;
-  const interestEarned = Math.round(balance - totalPaid);
-  const mEl = document.getElementById('cw_buf_months');
-  const iEl = document.getElementById('cw_buf_interest');
-  if (mEl) mEl.textContent = months + ' mån (' + (months/12).toFixed(1) + ' år)';
-  if (iEl) iEl.textContent = '+' + interestEarned.toLocaleString('sv-SE') + ' kr';
+function calcEquals() {
+  if (!CALC.op || CALC.prev === null) return;
+  const cur = parseFloat(CALC.result);
+  let res;
+  if (CALC.op === '+') res = CALC.prev + cur;
+  else if (CALC.op === '−') res = CALC.prev - cur;
+  else if (CALC.op === '×') res = CALC.prev * cur;
+  else if (CALC.op === '÷') res = cur !== 0 ? CALC.prev / cur : NaN;
+  CALC.expr = CALC.expr + ' ' + CALC.result + ' =';
+  CALC.result = isNaN(res) ? 'Fel' : String(Math.round(res * 1e8) / 1e8);
+  CALC.op = null; CALC.prev = null; CALC.newNum = true;
+  updateCalcDisplay();
+}
+
+function calcC() {
+  CALC.expr=''; CALC.result='0'; CALC.op=null; CALC.prev=null; CALC.newNum=true;
+  updateCalcDisplay();
+}
+
+function calcSign() {
+  CALC.result = String(-parseFloat(CALC.result));
+  updateCalcDisplay();
+}
+
+function calcPct() {
+  CALC.result = String(parseFloat(CALC.result) / 100);
+  updateCalcDisplay();
 }
 
 // ============================================================
@@ -751,26 +805,7 @@ function renderLevel1() {
       💡 Formel: Nettolön ≈ Bruttolön × (1 − skatteprocent / 100)
     </div>
 
-    <div class="calc-widget">
-      <div class="calc-widget-title">🖩 Miniräknare — beräkna nettolön</div>
-      <div class="calc-widget-rows">
-        <div class="calc-widget-row">
-          <label>Bruttolön (kr/mån)</label>
-          <input class="cwi" id="cw_gross" type="number" value="${p.gross}" oninput="calcNet()">
-        </div>
-        <div class="calc-widget-row">
-          <label>Skatteprocent (%)</label>
-          <input class="cwi" id="cw_tax" type="number" value="31" min="1" max="60" step="0.5" oninput="calcNet()">
-          <span style="font-size:12px;color:var(--muted)">(kommunalskatt, typiskt 30–33%)</span>
-        </div>
-      </div>
-      <div class="calc-result-row">
-        <span class="calc-result-label">Beräknad nettolön:</span>
-        <span class="calc-result-val" id="cw_net_result" data-val="0">${Math.round(p.gross * 0.69).toLocaleString('sv-SE')} kr</span>
-        <button class="calc-use-btn" onclick="calcNetUse()">Använd →</button>
-      </div>
-      <div style="font-size:11px;color:var(--muted);margin-top:6px">Klicka "Använd" för att föra över svaret automatiskt, eller räkna själv och skriv in det nedan.</div>
-    </div>
+    <button class="calc-open-btn" onclick="openCalc()"><span class="calc-icon">🧮</span> Öppna miniräknaren</button>
 
     <div class="num-input-wrap" style="margin-top:14px">
       <input type="number" class="num-input" id="netInput" placeholder="0" value="${l1.netInput}" oninput="GS.l1.netInput=this.value">
@@ -906,26 +941,7 @@ function renderLevel2() {
     <h3 style="margin-bottom:12px">🧮 Beräkna din årsboendekostnad</h3>
     <p style="font-size:14px;color:var(--muted);margin-bottom:12px">Vad kostar ditt boende per <strong>år</strong>? Multiplicera din månadssum med antalet månader.</p>
 
-    <div class="calc-widget">
-      <div class="calc-widget-title">🖩 Miniräknare — månadssum × månader</div>
-      <div class="calc-widget-rows">
-        <div class="calc-widget-row">
-          <label>Månadssum (kr)</label>
-          <input class="cwi" id="cw_monthly" type="number" value="${h.total}" oninput="calcAnnual()">
-        </div>
-        <div class="calc-widget-row">
-          <label>Antal månader</label>
-          <input class="cwi" id="cw_months_a" type="number" value="12" min="1" max="12" oninput="calcAnnual()">
-          <span style="font-size:12px;color:var(--muted)">(ett år = 12 månader)</span>
-        </div>
-      </div>
-      <div class="calc-result-row">
-        <span class="calc-result-label">Beräknad årsboendekostnad:</span>
-        <span class="calc-result-val" id="cw_annual_result" data-val="0">${(h.total*12).toLocaleString('sv-SE')} kr</span>
-        <button class="calc-use-btn" onclick="calcAnnualUse()">Använd →</button>
-      </div>
-      <div style="font-size:11px;color:var(--muted);margin-top:6px">Klicka "Använd" för att föra över svaret, eller räkna själv och skriv in nedan.</div>
-    </div>
+    <button class="calc-open-btn" onclick="openCalc()"><span class="calc-icon">🧮</span> Öppna miniräknaren</button>
 
     <div class="num-input-wrap">
       <input type="number" class="num-input" id="annualInput" placeholder="0" value="${l2.annualInput}" oninput="GS.l2.annualInput=this.value">
@@ -1276,34 +1292,12 @@ function renderLevel4() {
 
     <hr class="divider">
     <h3 style="margin-bottom:12px">🏎️ Bonus: Vad kostar ett billån?</h3>
-    <div class="calc-widget">
-      <div class="calc-widget-title">🖩 Miniräknare — beräkna billånets verkliga kostnad</div>
-      <div class="calc-widget-rows">
-        <div class="calc-widget-row">
-          <label>Lånebelopp (kr)</label>
-          <input class="cwi" id="cw_loan" type="number" value="80000" oninput="calcLoan()">
-        </div>
-        <div class="calc-widget-row">
-          <label>Årsränta (%)</label>
-          <input class="cwi" id="cw_lrate" type="number" value="7" min="0" max="30" step="0.5" oninput="calcLoan()">
-        </div>
-        <div class="calc-widget-row">
-          <label>Löptid (månader)</label>
-          <input class="cwi" id="cw_lmonths" type="number" value="60" min="12" max="120" step="12" oninput="calcLoan()">
-        </div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px">
-        <div class="calc-result-row" style="flex-direction:column;align-items:flex-start;gap:2px">
-          <span class="calc-result-label">Månadsbetalning</span>
-          <span class="calc-result-val" id="cw_loan_monthly">1 584 kr</span>
-        </div>
-        <div class="calc-result-row" style="flex-direction:column;align-items:flex-start;gap:2px">
-          <span class="calc-result-label">Total räntekostnad</span>
-          <span class="calc-result-val" style="color:var(--danger)" id="cw_loan_interest">15 040 kr</span>
-        </div>
-      </div>
-      <div style="font-size:11px;color:var(--muted);margin-top:7px">💡 Prova att ändra räntan eller löptiden — se hur totalkostnaden förändras.</div>
+    <div class="fact-box" style="border-color:var(--l3)">
+      <strong>Räkna själv!</strong> Prova: 80 000 kr lån, 7% ränta, 60 månader. Vad blir månadsbetalningen?
+      Formel: <em>r × P / (1 − (1+r)^−n)</em> där r = månadsränta, P = lånebelopp, n = månader.
+      Eller räkna steg för steg med miniräknaren.
     </div>
+    <button class="calc-open-btn" onclick="openCalc()"><span class="calc-icon">🧮</span> Öppna miniräknaren</button>
     <div class="fact-box" style="border-color:var(--l3)">
       Tillkommer: bensin, försäkring, service, skatt — typiskt 2 500–3 500 kr/mån extra. <strong>Total bilkostnad kan lätt bli 4 000–5 000 kr/mån.</strong>
     </div>
@@ -1425,33 +1419,7 @@ function renderLevel5() {
       <div class="info-cell"><div class="label">Tid till buffert</div><div class="value" style="font-size:16px;color:var(--l2)">${monthsToBuffer ? monthsToBuffer + ' mån' : '—'}</div></div>
     </div>
     ${monthsToBuffer ? `<div class="feedback ok">✓ Med ${fmt(savingsPerMonth)}/mån sparad når du din buffert på <strong>${monthsToBuffer} månader</strong> (${Math.ceil(monthsToBuffer/12)} år). ${monthsToBuffer <= 12 ? 'Utmärkt!' : monthsToBuffer <= 24 ? 'Bra tempo!' : 'Fundera på hur du kan öka månadssparandet.'}</div>` : `<div class="feedback err">❌ Du sparar ingenting just nu — det går inte att bygga en buffert. Gå tillbaka och trimma budgeten.</div>`}
-    <div class="calc-widget" style="margin-top:14px">
-      <div class="calc-widget-title">🖩 Miniräknare — hur lång tid tar det att spara bufferten?</div>
-      <div class="calc-widget-rows">
-        <div class="calc-widget-row">
-          <label>Buffertmål (kr)</label>
-          <input class="cwi" id="cw_buf_target" type="number" value="${Math.round(bufferTarget)}" oninput="calcBuffer()">
-        </div>
-        <div class="calc-widget-row">
-          <label>Sparar/mån (kr)</label>
-          <input class="cwi" id="cw_buf_monthly" type="number" value="${Math.max(savingsPerMonth, 500)}" oninput="calcBuffer()">
-        </div>
-        <div class="calc-widget-row">
-          <label>Sparränta (%/år)</label>
-          <input class="cwi" id="cw_buf_rate" type="number" value="3" min="0" max="15" step="0.5" oninput="calcBuffer()">
-        </div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px">
-        <div class="calc-result-row" style="flex-direction:column;align-items:flex-start;gap:2px">
-          <span class="calc-result-label">Tid till buffert</span>
-          <span class="calc-result-val" id="cw_buf_months">—</span>
-        </div>
-        <div class="calc-result-row" style="flex-direction:column;align-items:flex-start;gap:2px">
-          <span class="calc-result-label">Räntevinst</span>
-          <span class="calc-result-val" style="color:var(--success)" id="cw_buf_interest">—</span>
-        </div>
-      </div>
-    </div>
+    <button class="calc-open-btn" onclick="openCalc()"><span class="calc-icon">🧮</span> Öppna miniräknaren — beräkna månader till buffert</button>
     <hr class="divider">
     <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800;margin-bottom:10px">🏦 Bästa sparmodellerna</div>
     ${[
